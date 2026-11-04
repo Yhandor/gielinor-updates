@@ -542,6 +542,8 @@ body.menu #wrap{grid-template-columns:1fr}
 #sy_box .twbtn{font-size:17px;padding:10px 16px!important}#sy_msg{font-size:15px;margin-top:8px}
 .ovrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #2a2116}.ovrow span{color:var(--cream)}
 .ovrow button{padding:5px 10px!important;font-size:14px}
+.ovrow.ovess{background:rgba(255,255,0,.07);box-shadow:inset 0 0 0 1px rgba(255,255,0,.55);padding:7px 8px;margin:3px 0}.ovrow.ovess span{color:#ffff00;display:grid;gap:2px}.ovrow.ovess .ovtag{font-style:normal;font-size:13px;letter-spacing:.08em;color:#ffff00;opacity:.85}
+.ovsub{border-top:1px solid #2a2116;margin-top:2px}.ovsub>summary{cursor:pointer;list-style:none;color:#ff981f;font-size:19px;padding:7px 0 5px;text-shadow:1px 1px 0 #000;user-select:none}.ovsub>summary::-webkit-details-marker{display:none}.ovsub>summary::before{content:"\25B6";display:inline-block;font-size:12px;margin-right:8px;color:#a89877;transition:transform .15s}.ovsub[open]>summary::before{transform:rotate(90deg)}.ovsub>summary:hover{color:#ffff00}.ovsub .ovrow{padding-left:14px}
 .srow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:5px 0;border-top:1px solid #2a2116}.srow span{color:var(--cream)}
 .srow input[type=range]{width:150px;padding:0;-webkit-appearance:none;appearance:none;height:22px;background:transparent;cursor:pointer;outline:none;--p:50%}
 .srow input[type=range]::-webkit-slider-runnable-track{height:10px;border:2px solid #000;background:linear-gradient(#d9a53a,#9c6f1c) 0 0/var(--p) 100% no-repeat,#14110b;box-shadow:inset 0 0 0 1px #6e5d41}
@@ -651,7 +653,7 @@ body.overlay:not(.ov-card):not(.ov-all) #csparks{display:none}
 /* sub menus slide in from the right and take the whole menu area (the main buttons slide away to the left) */
 #menuview{position:relative;overflow:hidden}
 #menunav,.mp.drop{grid-area:1/1}
-#menunav{justify-self:center;width:min(100%,380px)}   /* narrower main-menu buttons; the sub menus still fill the whole area */
+#menunav,.mp.drop{justify-self:center;width:min(100%,380px)}   /* the sub menus are the same width as the main-menu buttons */
 #menunav{transition:transform .28s ease,opacity .28s ease,visibility 0s linear 0s}
 #menuview.sub #menunav{transform:translateX(-35%);opacity:0;visibility:hidden;pointer-events:none;transition:transform .28s ease,opacity .28s ease,visibility 0s linear .28s}
 .mp.drop{background:var(--stone);border:3px solid #000;box-shadow:inset 0 0 0 2px #6e5d41,inset 0 0 0 3px #2a2116;padding:12px 16px;margin:0;min-width:0;text-align:left;animation:mslide .28s ease-out;z-index:2}
@@ -2058,7 +2060,7 @@ body.ov-card #gecard,body.ov-board #gecard{display:none}
 #gecard .gegrid{scrollbar-width:thin;scrollbar-color:#6e5d41 #1c150c;padding-right:2px}
 #gecard .gegrid::-webkit-scrollbar{width:8px}#gecard .gegrid::-webkit-scrollbar-track{background:#1c150c}#gecard .gegrid::-webkit-scrollbar-thumb{background:#6e5d41;border:1px solid #000}
 #machine{zoom:var(--gz,1)}
-#ms_size{background:#1c150c;color:#ffe27a;border:2px solid #6e5d41;font:inherit;padding:2px 6px}
+#ms_size,#ms_popdir{background:#1c150c;color:#ffe27a;border:2px solid #6e5d41;font:inherit;padding:2px 6px}
 #ov_url{display:none!important}   /* link text under the overlay rows hidden (COPY LINK still copies it) */
 /* reset buttons removed from the UI (elements kept hidden so nothing else breaks) */
 #ms_reset,#ms_lvl,#resetlvl,#reset,.srow:has(#ms_reset),.srow:has(#ms_lvl){display:none!important}
@@ -3001,6 +3003,19 @@ body.ov-card #logcard,body.ov-card #gecard,body.ov-board #logcard,body.ov-board 
 #grwheel .gtl.owned i,#grwheel .gtl.owned b{opacity:.45;filter:grayscale(.8)}
 #grwheel .gtl em.own{background:#4a4a4a;color:#e6e6e6;border-color:#000;font-size:14px;line-height:15px;letter-spacing:.08em}
 #ex_spinsnd{position:relative;display:block;width:100%;margin:6px 0 0;padding:7px 34px 7px 12px;font-size:16px;letter-spacing:.04em}#ex_spinsnd::after{content:"\25B6";position:absolute;right:14px;top:50%;transform:translateY(-50%) scale(.8);font-size:14px;color:#a89877}#ex_spinsnd:hover::after{color:#ffff00}#ex_tourney{margin-top:6px!important}
+
+/* CONNECT page: compact layout so everything fits without the scroll box */
+#mp_connect[hidden]{display:none!important}
+#mp_connect{overflow-y:auto!important;display:flex;flex-direction:row;flex-wrap:wrap;align-content:flex-start;align-items:center;column-gap:12px;row-gap:4px;padding-top:6px!important;padding-bottom:6px!important}
+#mp_connect .mback{display:inline-block;margin:0!important;padding:4px 12px!important;font-size:16px!important;align-self:flex-start}
+#mp_connect .chead{display:contents}#mp_connect>:not(.mback):not(.chead){width:100%}
+#mp_connect .chead h3{font-size:21px!important;margin:0!important}
+#mp_connect .cstat{gap:10px;width:100%;order:0}#mp_connect .cstat .cs{font-size:16px;gap:6px}#mp_connect .cstat .csb{width:20px;height:20px}#mp_connect .cstat .csb.on::after{left:4px;width:5px;height:10px;border-width:0 3px 3px 0}
+#mp_connect .mrow{margin:0!important;gap:6px}#mp_connect .mrow .tab{padding:6px 12px!important;font-size:17px!important}
+#mp_connect .twbtn,#mp_connect .kkbtn{padding:8px 14px!important;font-size:17px!important}#mp_connect #mc_twbox .twbtn,#mp_connect #mc_kickbox .kkbtn{padding:9px 16px!important;font-size:17px!important}
+#mp_connect .mnote{margin:2px 0!important;font-size:17px!important;line-height:1.15!important}
+#mp_connect #sy_box>.mnote.dim,#mp_connect #sy_box>.mnote:first-child{display:none}#mp_connect #sy_box .mlab{display:none}#mp_connect{justify-content:center;text-align:center}#mp_connect .mrow,#mp_connect .cstat{justify-content:center}#mp_connect .mnote,#mp_connect .mnote.dim{text-align:center}#mp_connect #sy_box .mtxt{text-align:center}#mp_connect #sy_box .mrow{justify-content:center;align-items:center}#mp_connect .mback{align-self:center}
+#mp_connect .cstat{margin-top:10px!important}#mp_connect #sy_msg:empty{display:none}#mp_connect #sy_box .twbtn{padding:5px 14px!important}#mp_connect #sy_box .mtxt{padding:3px 8px!important;margin:1px 0!important;font-size:16px!important}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3091,7 +3106,7 @@ body.ov-card #logcard,body.ov-card #gecard,body.ov-board #logcard,body.ov-board 
         </div>
         <div class="mp" id="mp_overlays" hidden>
           <h3>OBS OVERLAYS</h3>
-          <p>Add each as a Browser Source in OBS. They have a transparent background and need no buttons.</p>
+          <p>Add each as a Browser Source in OBS. They have a transparent background and need no buttons.<br><span style="color:#5dff5d">Pop-up Cards will be a clear box on OBS, place that box so its somewhere on your OBS preview for when the cards pop out.</span></p>
           <div id="ov_rows"></div>
           <div class="mnote dim" id="ov_url"></div>
         </div>
@@ -3103,10 +3118,11 @@ body.ov-card #logcard,body.ov-card #gecard,body.ov-board #logcard,body.ov-board 
           <div class="srow"><span>!spin Cooldown</span><input type="range" id="ms_scd" min="0" max="30" step="1"><b id="ms_scd_v">6s</b></div>
           <div class="srow"><span>!free Cooldown</span><input type="range" id="ms_fcd" min="1" max="60" step="1"><b id="ms_fcd_v">5 min</b></div>
           <div class="srow"><span>Pop-up Cards Stay For</span><input type="range" id="ms_pop" min="5" max="60" step="1"><b id="ms_pop_v">12s</b></div>
+          <div class="srow"><span>Pop-up Cards Slide In From</span><select id="ms_popdir"><option value="right">Right</option><option value="left">Left</option><option value="up">Top (slides down)</option><option value="down">Bottom (slides up)</option></select></div>
           <div class="srow"><span>Idle Animations After</span><input type="range" id="ms_idle" min="15" max="180" step="15"><b id="ms_idle_v">60s</b></div>
           <div class="srow" style="display:none"><span>Show Test Panel in Game</span><button type="button" id="ms_dev">ON</button></div>
-          <div class="srow"><span>Game Version <b id="ms_ver"></b></span><button type="button" id="ms_upd" hidden>CHECK FOR UPDATES</button></div>
-          <div class="mnote dim" id="ms_updmsg" hidden style="font-size:15px;line-height:1.3;margin:2px 0 6px"></div>
+          <div class="srow"><span>Game Version <b id="ms_ver"></b></span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" id="ms_upd" hidden>CHECK FOR UPDATES</button></span></div>
+          <div class="mnote dim" id="ms_updmsg" hidden style="font-size:15px;line-height:1.3;word-break:normal;overflow-wrap:break-word;margin:2px 0 6px"></div>
           <div class="srow"><span>Skip This Menu on Launch</span><button type="button" id="ms_skip">OFF</button></div>
           <div class="srow" style="display:none"><span>Data: <b id="ms_folder">Browser storage</b></span><button type="button" id="ms_open" hidden>OPEN FOLDER</button></div>
           <div class="srow" style="display:none"><span>Player Accounts: <b id="ms_acn">0</b></span><button type="button" id="ms_exp">EXPORT</button></div>
@@ -3530,7 +3546,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.0";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.1";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -5294,7 +5310,8 @@ $("fake").addEventListener("keydown",e=>{if(e.key==="Enter"){onChat("you",e.targ
 const OV_NAMES={machine:["Machine","#machine"],card:["Player Card","#card"],skills:["Skills","#skillcard"],pets:["Pets","#petcard"],log:["Collection Log","#logcard"],ge:["Grand Exchange","#gecard"],board:["Leaderboard","#boardpanel"],popups:["Pop-up Cards","#popwrap"]};
 const OV_PANELS=(()=>{const out=Object.entries(OV_NAMES).map(([k,[n,sel]])=>({key:k,name:n,sel}));const known=new Set(out.map(p=>p.sel));
   document.querySelectorAll("section.panel[id]").forEach(el=>{const sel="#"+el.id;if(known.has(sel)||el.id==="mcard"||el.id==="menupane")return;out.push({key:el.id,name:el.dataset.ovName||el.id.replace(/card$|panel$/,"")||el.id,sel})});return out})();
-{const rows=document.getElementById("ov_rows");if(rows)rows.innerHTML=OV_PANELS.filter(p=>p.key!=="tourneypanel").map(p=>'<div class="ovrow"><span>'+p.name.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</span><button type="button" data-ov="'+p.key+'">COPY LINK</button><button type="button" data-open="'+p.key+'">PREVIEW</button></div>').join("")}
+{const rows=document.getElementById("ov_rows");if(rows){const IND=["card","skills","pets","log","ge"],ESS=["machine","popups"],row=p=>'<div class="ovrow'+(ESS.includes(p.key)?' ovess':'')+'"><span>'+p.name.replace(/&/g,"&amp;").replace(/</g,"&lt;")+(ESS.includes(p.key)?'<em class="ovtag">ESSENTIAL - MUST USE</em>':'')+'</span><button type="button" data-ov="'+p.key+'">COPY LINK</button><button type="button" data-open="'+p.key+'">PREVIEW</button></div>',all=OV_PANELS.filter(p=>p.key!=="tourneypanel");
+  rows.innerHTML=ESS.map(k=>all.find(p=>p.key===k)).filter(Boolean).concat(all.filter(p=>!IND.includes(p.key)&&!ESS.includes(p.key))).map(row).join("")+'<details class="ovsub"><summary>Individual Overlays</summary>'+IND.map(k=>all.find(p=>p.key===k)).filter(Boolean).map(row).join("")+'</details>'}}
 {const o=new URLSearchParams(location.search).get("overlay"),cur=OV_PANELS.find(p=>p.key===o);
  if(cur&&!["machine","card","board","popups"].includes(cur.key)){const st=document.createElement("style");st.textContent="body.ov-"+cur.key+" #wrap{display:block!important;max-width:none!important;margin:0}body.ov-"+cur.key+" #side,body.ov-"+cur.key+" #lcol{display:block!important}body.ov-"+cur.key+" #machine{display:none!important}"+OV_PANELS.filter(p=>p.sel!==cur.sel&&p.key!=="machine").map(p=>"body.ov-"+cur.key+" "+p.sel+"{display:none!important}").join("")+"body.ov-"+cur.key+" #mcard{display:none!important}";document.head.appendChild(st)}}
 /* OBS: add ?chatroom=12345 to the file URL for a transparent, auto-connecting overlay */
@@ -5305,17 +5322,19 @@ if(q.get("overlay")!==null||q.get("chatroom"))document.body.classList.add("overl
    a card slides in when its chat command is used, stays for the set time, then slides back out ---- */
 if(q.get("overlay")==="popups"){
   const MAP={"!playercard":"card","!skillcard":"skillcard","!petcard":"petcard","!log":"logcard","!collectionlog":"logcard","!ge":"gecard","!shop":"gecard"};
-  const secs=Math.max(3,Math.min(120,parseFloat(q.get("pop"))||12));
+  const secs=Math.max(3,Math.min(120,parseFloat(q.get("pop"))||12)),DIR=["left","right","up","down"].includes(q.get("dir"))?q.get("dir"):"right",OFF={left:"translateX(-100vw)",right:"translateX(100vw)",up:"translateY(-100vh)",down:"translateY(100vh)"}[DIR],PAD=24;   // cards sit centred, with the same gap on all four sides (and shrink if the source is too small for card + gap)
   const st=document.createElement("style");
-  st.textContent="body.ov-popups #wrap,body.ov-popups #lcol,body.ov-popups #side{display:block!important;max-width:none!important;margin:0;padding:0}body.ov-popups #machine,body.ov-popups #mcard,body.ov-popups #boardpanel,body.ov-popups #tourneypanel,body.ov-popups #queuecard{display:none!important}"+
-   "body.ov-popups #card,body.ov-popups #skillcard,body.ov-popups #petcard,body.ov-popups #logcard,body.ov-popups #gecard{position:absolute!important;top:0;left:0;margin:0!important;opacity:0;transform:translateX(-115%);pointer-events:none;transition:transform .55s cubic-bezier(.2,.9,.25,1.05),opacity .4s}"+
-   "body.ov-popups .panel.popin{opacity:1!important;transform:none!important}";
+  st.textContent="html:has(body.ov-popups),body.ov-popups{overflow:hidden!important}body.ov-popups #wrap,body.ov-popups #lcol,body.ov-popups #side{display:block!important;max-width:none!important;margin:0;padding:0}body.ov-popups #machine,body.ov-popups #mcard,body.ov-popups #boardpanel,body.ov-popups #tourneypanel,body.ov-popups #queuecard{display:none!important}"+
+   "body.ov-popups #card,body.ov-popups #skillcard,body.ov-popups #petcard,body.ov-popups #logcard,body.ov-popups #gecard{position:absolute!important;top:50%;left:50%;margin:0!important;opacity:0;transform:translate(-50%,-50%) "+OFF+" scale(var(--ps,1));pointer-events:none;transition:transform .55s cubic-bezier(.2,.9,.25,1.05),opacity .4s}"+
+   "body.ov-popups .panel.popin{opacity:1!important;transform:translate(-50%,-50%) scale(var(--ps,1))!important}";
   document.head.appendChild(st);
   const tm={};let z=10,owner=null,until=0;
   /* one player at a time: while a card is showing, other players' card commands are ignored until it slides out (admins can still use them) */
   window.popBusy=(user,cmd)=>MAP[cmd]&&owner&&owner!==user&&Date.now()<until&&!(window.isAdmin&&isAdmin(user));
+  const fit=el=>{const w=el.offsetWidth,h=el.offsetHeight;if(w&&h)el.style.setProperty("--ps",Math.min(1,(innerWidth-2*PAD)/w,(innerHeight-2*PAD)/h).toFixed(4))};
   window.popCmd=(cmd,user)=>{const id=MAP[cmd];if(!id)return;const el=document.getElementById(id);if(!el)return;
     owner=user;until=Math.max(until,Date.now()+secs*1000);
+    fit(el);
     el.style.zIndex=++z;el.classList.add("popin");clearTimeout(tm[id]);tm[id]=setTimeout(()=>{el.classList.remove("popin");if(!document.querySelector(".panel.popin"))owner=null},secs*1000)};
 }
 if(q.get("chatroom")){$("chatroom").value=q.get("chatroom");connect(q.get("chatroom"))}
@@ -6686,7 +6705,7 @@ setInterval(()=>{
 document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.value="";const f=window["dmd"+v+"Now"];if(v&&f)f()};
 /* ---- main menu (title screen): Play / Connect / Overlays / Settings / Exit. Shares the machine frame, its border lights and background. ---- */
 (function mainMenu(){
-  const body=document.body,mv=$("menuview"),S={idle:60,dev:true,skip:false,room:"",spinCd:6,freeCd:5,popSec:12};
+  const body=document.body,mv=$("menuview"),S={idle:60,dev:true,skip:false,room:"",spinCd:6,freeCd:5,popSec:12,popDir:"right"};
   try{Object.assign(S,JSON.parse(Store.get("kickSlotsSettings")||"{}"))}catch{}
   const save=()=>{try{Store.set("kickSlotsSettings",JSON.stringify(S))}catch{}};
   window.DMD_IDLE_MS=S.idle*1000;body.classList.toggle("nodev",!S.dev);const applyCd=()=>{SPIN_CD=Math.max(0,Math.min(30,+S.spinCd))*1000;FREE_CD=Math.max(1,Math.min(60,+S.freeCd))*60000};applyCd();
@@ -6706,7 +6725,7 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   let cur="home";
   const statusTxt=()=>($("status").textContent||"Not connected.").trim();
   function syncConnect(){$("mc_room").value=S.room||$("chatroom").value||"";$("mc_status").textContent=statusTxt()}
-  function syncSettings(){{const fo=Store.folder();$("ms_folder").textContent=fo||"Browser storage";$("ms_folder").style.wordBreak="break-all";$("ms_open").hidden=!fo}$("ms_acn").textContent=Object.keys(window.allAccounts()).length;$("ms_snd").textContent=/off/i.test($("snd").textContent)?"OFF":"ON";$("ms_vol").value=$("vol").value;$("ms_vol_v").textContent=$("vol").value+"%";$("ms_scd").value=S.spinCd;$("ms_scd_v").textContent=S.spinCd+"s";$("ms_fcd").value=S.freeCd;$("ms_fcd_v").textContent=S.freeCd+" min";$("ms_idle").value=S.idle;$("ms_idle_v").textContent=S.idle+"s";$("ms_pop").value=S.popSec;$("ms_pop_v").textContent=S.popSec+"s";$("ms_dev").textContent=S.dev?"ON":"OFF";$("ms_skip").textContent=S.skip?"ON":"OFF"}
+  function syncSettings(){{const fo=Store.folder();$("ms_folder").textContent=fo||"Browser storage";$("ms_folder").style.wordBreak="break-all";$("ms_open").hidden=!fo}$("ms_acn").textContent=Object.keys(window.allAccounts()).length;$("ms_snd").textContent=/off/i.test($("snd").textContent)?"OFF":"ON";$("ms_vol").value=$("vol").value;$("ms_vol_v").textContent=$("vol").value+"%";$("ms_scd").value=S.spinCd;$("ms_scd_v").textContent=S.spinCd+"s";$("ms_fcd").value=S.freeCd;$("ms_fcd_v").textContent=S.freeCd+" min";$("ms_idle").value=S.idle;$("ms_idle_v").textContent=S.idle+"s";$("ms_pop").value=S.popSec;$("ms_popdir").value=S.popDir||"right";$("ms_pop_v").textContent=S.popSec+"s";$("ms_dev").textContent=S.dev?"ON":"OFF";$("ms_skip").textContent=S.skip?"ON":"OFF"}
   {const TRO="url(\"data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#ffd24a" stroke="#6b4a00" stroke-width="1" d="M7 3h10v5a5 5 0 0 1-10 0V3Z"/><path fill="none" stroke="#e8a81f" stroke-width="1.6" d="M7 4.5H4v2a3 3 0 0 0 3 3M17 4.5h3v2a3 3 0 0 1-3 3"/><path fill="#ffd24a" stroke="#6b4a00" stroke-width="1" d="M10.5 13h3v3h-3zM8 17h8v3H8z"/><path fill="#fff6c0" d="M9 4.5h1.6v4.2A2.8 2.8 0 0 1 9 6.2Z"/></svg>')+"\")";
     const tb=document.getElementById("ex_tourney");let ti=0;
     const fly=()=>{const t=document.createElement("i"),w=tb.clientWidth||480,s=14+Math.random()*12;t.className="ftro";t.style.setProperty("--tro",TRO);t.style.width=t.style.height=s+"px";t.style.top=(Math.random()*(Math.max(10,tb.clientHeight-s)))+"px";t.style.setProperty("--dx",-(w+s+10)+"px");t.style.setProperty("--rot",(Math.random()*120-60)+"deg");t.style.setProperty("--d",(2.2+Math.random()*1.6)+"s");t.addEventListener("animationend",()=>t.remove());tb.appendChild(t)};
@@ -6720,7 +6739,7 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
     const top=Tourney.top(10);ls.innerHTML=top.length?top.map(([u,s],i)=>'<li><span class="tr">#'+(i+1)+'</span><span class="tn">'+esc(dn(u))+'</span><span class="tr">'+s.spins.toLocaleString("en-US")+(s.spins===1?' spin':' spins')+'</span><span class="tg">'+s.won.toLocaleString("en-US")+' gp</span></li>').join(""):'<li class="te">No scores yet.</li>'}
   $("tn_start").onclick=()=>{Tourney.start();renderTn()};$("tn_end").onclick=()=>{Tourney.end();renderTn()};$("tn_reset").onclick=()=>{Tourney.clear();renderTn()};
   setInterval(()=>{if(cur==="tournament"&&!mv.hidden)renderTn()},2000);
-  function baseUrl(m){let u=location.href.split(/[?#]/)[0]+"?overlay="+m;if(m==="popups")u+="&pop="+S.popSec;return S.room?u+"&chatroom="+S.room:u}
+  function baseUrl(m){let u=location.href.split(/[?#]/)[0]+"?overlay="+m;if(m==="popups")u+="&pop="+S.popSec+"&dir="+(S.popDir||"right");return S.room?u+"&chatroom="+S.room:u}
   function show(p){cur=p;if(p!=="spinsnd")try{window.stopSpinPreview()}catch{}$("menupane").hidden=true;mv.classList.toggle("homev",p==="home");mv.classList.toggle("sub",p!=="home");body.classList.toggle("menusub",p!=="home");Object.entries(panes).forEach(([k,e])=>e.hidden=k!==p);navBtns.forEach(b=>b.classList.toggle("on",b.dataset.m===p));
     if(p==="tournament")renderTn();if(p==="connect")syncConnect();if(p==="settings"){syncSettings();paintRanges()}if(p==="overlays")$("ov_url").textContent=baseUrl("machine")}
   function open(){window.DMD_MENU=true;body.classList.add("menu");mv.hidden=false;studs=null;$("who").innerHTML="Welcome to <b>Gielinor Casino</b>";$("result").textContent="";show("home");mv.style.height="";if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
@@ -6770,13 +6789,14 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   /* One-click sign-in (device code flow): the game asks the shared server for a code, opens the Twitch page where the player just clicks Authorize, then collects the login by itself. No app setup, no secrets on the player's PC. */
   const SRV=()=>{try{return String(Sync.C.url||"").replace(/\/+$/,"")}catch{return ""}};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const popWin=()=>{const N=window.GielinorNative;if(N&&N.openExternal)return{closed:false,close(){this.closed=true},location:{set href(u){try{N.openExternal(u)}catch{}}}};let w=null;try{w=window.open("about:blank","_blank")}catch{}return w};   // .exe: opens the normal browser
   const jpost=async(path,body)=>{const r=await fetch(SRV()+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch{}return{ok:r.ok,d}};
   const twGot=async t=>{const v=await twValidate(t.access_token);T.token=t.access_token;T.refresh=t.refresh_token||T.refresh||"";T.login=String(v.login||"").toLowerCase();T.cid=v.client_id||T.cid;tsave()};
   async function twRefresh(){if(!T.refresh||!/^https?:\/\//.test(SRV()))return false;try{const {ok,d}=await jpost("/twitch/refresh",{refresh_token:T.refresh});if(!ok||!d.access_token)return false;await twGot(d);return true}catch{return false}}
   /* best version: straight to Twitch's Authorize page via the shared server (needs the Confidential Twitch app + secret on the server); falls back to the device-code page */
   async function twDirectLogin(){
     if(!/^https?:\/\//.test(SRV()))return "unavailable";
-    const btn=$("tw_auth");btn.disabled=true;let win=null;try{win=window.open("about:blank","_blank")}catch{}
+    const btn=$("tw_auth");btn.disabled=true;let win=null;try{win=popWin()}catch{}
     try{tstat("Contacting Twitch…");
       const {ok,d}=await jpost("/twitch/begin",{});
       if(!ok||!d.url){if(win&&!win.closed)try{win.close()}catch{}btn.disabled=false;return "unavailable"}
@@ -6792,7 +6812,7 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   const syAuto=k=>{if(!k||typeof Sync==="undefined")return;try{Sync.set({key:k,on:true,url:Sync.C.url||SRV()});const u=$("sy_url"),y=$("sy_key"),c=$("sy_on");if(u)u.value=Sync.C.url;if(y)y.value=k;if(c)c.checked=true;const m=$("sy_msg");if(m){m.style.color="#7be07b";m.textContent="Shared saves turned on automatically from your sign-in."}Sync.tick(false)}catch{}};
   async function twDeviceLogin(){
     if(!/^https?:\/\//.test(SRV()))return "unavailable";
-    const btn=$("tw_auth");btn.disabled=true;let win=null;try{win=window.open("about:blank","_blank")}catch{}   // opened inside the click so the browser allows it
+    const btn=$("tw_auth");btn.disabled=true;let win=null;try{win=popWin()}catch{}   // opened inside the click so the browser allows it
     try{tstat("Contacting Twitch…");
       const {ok,d}=await jpost("/twitch/device",{scopes:"chat:read"});
       if(!ok||!d.device_code)throw new Error(d.message||"Twitch sign-in is not available right now.");
@@ -6810,11 +6830,11 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   const NAUTH=()=>window.GielinorNative&&window.GielinorNative.auth;   // present inside the .exe: sign-in runs in the normal browser
   $("tw_auth").onclick=async()=>{
     if(T.token&&T.login){twConnect();return}
+    {let r=await twDirectLogin();if(r==="unavailable")r=await twDeviceLogin();if(r!=="unavailable")return}
     if(NAUTH()){const btn=$("tw_auth");btn.disabled=true;tstat("Your browser is opening. Click Authorize on Twitch, then come back here…");
       let r;try{r=await NAUTH()("twitch")}catch(e){r={error:"failed",message:String(e)}}btn.disabled=false;
       if(r.error){tstat(r.message||"Twitch sign-in failed.");return}
       T.token=r.token;T.login=r.login;T.cid=r.cid;tsave();twUI();twConnect();return}
-    {let r=await twDirectLogin();if(r==="unavailable")r=await twDeviceLogin();if(r!=="unavailable")return}
     const cid=($("tw_cid").value.trim()||T.cid||TW_CLIENT_ID);
     if(!cid){tstat("Twitch sign-in is set up in the desktop app. To test now, type a channel below and use Watch Channel.");return}
     if(!tredirect()){tstat("Twitch sign-in needs the desktop app. To test now, type a channel below and use Watch Channel.");return}
@@ -6845,7 +6865,7 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   }
   async function kDeviceLogin(){
     if(!/^https?:\/\//.test(SRV()))return "unavailable";
-    const btn=$("kk_auth");btn.disabled=true;let win=null;try{win=window.open("about:blank","_blank")}catch{}
+    const btn=$("kk_auth");btn.disabled=true;let win=null;try{win=popWin()}catch{}
     try{kstat("Contacting Kick…");
       const {ok,d}=await jpost("/kick/begin",{});
       if(!ok||!d.url){if(win&&!win.closed)try{win.close()}catch{}btn.disabled=false;return /not set up/i.test(String(d.message||""))?"unavailable":(kstat(d.message||"Kick sign-in is not available right now."),false)}
@@ -6860,11 +6880,11 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
     finally{btn.disabled=false}}
   $("kk_auth").onclick=async()=>{
     if(K.slug){kFinish(K.slug);return}
+    {const r=await kDeviceLogin();if(r!=="unavailable")return}   // one click: sign-in runs through the shared server
     if(NAUTH()){const btn=$("kk_auth");btn.disabled=true;kstat("Your browser is opening. Click Authorize on Kick, then come back here…");
       let r;try{r=await NAUTH()("kick")}catch(e){r={error:"failed",message:String(e)}}btn.disabled=false;
       if(r.error){kstat(r.message||"Kick sign-in failed.");return}
       kFinish(r.slug,r.chatroom);return}
-    {const r=await kDeviceLogin();if(r!=="unavailable")return}   // one click: sign-in runs through the shared server
     const cid=$("kk_cid").value.trim()||K.cid,sec=$("kk_sec").value.trim()||K.sec;
     if(!cid||!sec){$("kk_setup").open=true;kstat("Paste your Kick Client ID and Secret below first (one-time setup).");return}
     if(!tredirect()||!(window.crypto&&crypto.subtle)){$("kk_setup").open=true;kstat("Kick can only send you back to an http(s) address. Open the game from a local web server or the app.");return}
@@ -6908,6 +6928,7 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   $("ms_vol").oninput=e=>{$("ms_vol_v").textContent=e.target.value+"%";$("vol").value=e.target.value;$("vol").dispatchEvent(new Event("input"))};
   $("ms_scd").oninput=e=>{S.spinCd=+e.target.value;applyCd();$("ms_scd_v").textContent=S.spinCd+"s";save()};
   $("ms_fcd").oninput=e=>{S.freeCd=+e.target.value;applyCd();$("ms_fcd_v").textContent=S.freeCd+" min";save()};
+  $("ms_popdir").onchange=e=>{S.popDir=e.target.value;save()};
   $("ms_pop").oninput=e=>{S.popSec=+e.target.value;$("ms_pop_v").textContent=S.popSec+"s";save()};
   {const N=window.GielinorNative,U=N&&N.update,btn=$("ms_upd"),msg=$("ms_updmsg");$("ms_ver").textContent="V"+GAME_VERSION;
    if(U){btn.hidden=false;let mode="check",busy=false;
