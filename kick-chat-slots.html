@@ -3551,7 +3551,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.41";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.45";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -4057,12 +4057,17 @@ const SPIN_BEDS=(()=>{
 const SPIN_SNDS=[["cur","Current Machine Spin"]].concat(Object.keys(SPIN_BEDS).map(k=>[k,SPIN_BEDS[k].name]));
 window.SPIN_ID="cur";
 /* starts the spin sound; returns {stop()} which the caller runs when the last reel has stopped */
-function startSpinSound(id){id=id||window.SPIN_ID;const bd=SPIN_BEDS[id];
+function startSpinSound0(id){id=id||window.SPIN_ID;const bd=SPIN_BEDS[id];
   if(!bd){sndSpin();const tk=setInterval(sndTick,90);return{stop(){clearInterval(tk)}}}
   const a=ac();if(!a||muted||volume<=0)return{stop(){}};
   const bus=a.createGain();bus.connect(master);window._spinBus=bus;let on=true,tm=0;
   const seg=()=>{if(!on)return;sndBus=bus;try{bd.f()}catch(e){console.error("spin bed",e)}sndBus=null;tm=setTimeout(seg,bd.len*1000)};seg();
   return{stop(){on=false;clearTimeout(tm);if(window._spinBus===bus)window._spinBus=null;try{const t=a.currentTime;bus.gain.cancelScheduledValues(t);bus.gain.setValueAtTime(bus.gain.value,t);bus.gain.linearRampToValueAtTime(0,t+.15)}catch{}setTimeout(()=>{try{bus.disconnect()}catch{}},500)}}}
+/* safety wrapper: only one spin sound at a time, stop() is idempotent, and any spin sound that is still running after 20 s is cut (a hidden or interrupted spin must never leave the sound looping) */
+function startSpinSound(id){try{window._spinH&&window._spinH.stop()}catch{}
+  const h0=startSpinSound0(id);let done=false,tm=0;
+  const h={stop(){if(done)return;done=true;clearTimeout(tm);if(window._spinH===h)window._spinH=null;try{h0.stop()}catch{}}};
+  tm=setTimeout(()=>h.stop(),20000);window._spinH=h;return h}
 let _prevT=[],_prevH=null;
 window.previewSpinSound=(id,done)=>{window.stopSpinPreview();const h=startSpinSound(id);_prevH=h;   // one full spin: the reels stop at 3.4 s, 4.0 s and 4.6 s like a normal spin
   _prevT=[setTimeout(()=>{try{sndStop(0)}catch{}},3400),setTimeout(()=>{try{sndStop(1)}catch{}},4000),setTimeout(()=>{try{sndStop(2)}catch{}h.stop();_prevH=null;done&&done()},4600)]};
