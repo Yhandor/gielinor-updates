@@ -3020,7 +3020,7 @@ body.ov-card #logcard,body.ov-card #gecard,body.ov-board #logcard,body.ov-board 
 body.capture{background:#000!important;margin:0!important;padding:0!important;overflow:hidden!important;height:100vh}
 body.capture #side,body.capture #lcol #card,body.capture #tourneypanel,body.capture #queuecard,body.capture #logcard,body.capture #gecard,body.capture #setup,body.capture #menubtn{display:none!important}
 body.capture #machine{width:556px!important;min-width:0!important}
-body.capture #wrap{position:fixed!important;left:0;top:0;margin:0!important;padding:0!important;width:695px!important;grid-template-columns:1fr!important;transform:translate(var(--cx,0px),var(--cy,0px)) scale(var(--cs,1));transform-origin:0 0}
+body.capture #wrap{position:fixed!important;left:var(--cx,0px);top:var(--cy,0px);margin:0!important;padding:0!important;width:695px!important;grid-template-columns:1fr!important;zoom:var(--cs,1)}   /* zoom (not transform): the page is laid out at its final size, so animations stay sharp and smooth */
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3551,7 +3551,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.3";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.31";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -6961,12 +6961,12 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   $("ms_idle").oninput=e=>{S.idle=+e.target.value;window.DMD_IDLE_MS=S.idle*1000;$("ms_idle_v").textContent=S.idle+"s";save()};
   $("ms_dev").onclick=()=>{S.dev=!S.dev;body.classList.toggle("nodev",!S.dev);save();syncSettings()};
   $("ms_skip").onclick=()=>{S.skip=!S.skip;save();syncSettings()};
-  const fitCap=()=>{const b=document.body,R=document.documentElement.style;if(!b.classList.contains("capture")){["--cs","--cx","--cy","--cw"].forEach(k=>R.removeProperty(k));return}
-    const w=695,hh=556,s=Math.min(innerWidth/w,innerHeight/hh);
-    R.setProperty("--cw",w+"px");R.setProperty("--cs",s);R.setProperty("--cx",Math.max(0,(innerWidth-w*s)/2)+"px");R.setProperty("--cy",Math.max(0,(innerHeight-hh*s)/2)+"px");
+  const fitCap=()=>{const b=document.body,R=document.documentElement.style;if(!b.classList.contains("capture")){if(fitCap.k){fitCap.k="";["--cs","--cx","--cy"].forEach(k=>R.removeProperty(k))}return}
+    const w=695,hh=556,s=Math.min(innerWidth/w,innerHeight/hh),k=[innerWidth,innerHeight].join("x");
+    if(fitCap.k!==k){fitCap.k=k;R.setProperty("--cs",s);R.setProperty("--cx",Math.max(0,(innerWidth-w*s)/2)/s+"px");R.setProperty("--cy",Math.max(0,(innerHeight-hh*s)/2)/s+"px")}
     try{const N=window.GielinorNative;if(N&&N.capture&&fitCap.w!==w+"x"+hh){fitCap.w=w+"x"+hh;N.capture(true,w,hh)}}catch{}};
-  const applyCap=()=>{const on=!!S.capture&&!document.body.classList.contains("overlay");document.body.classList.toggle("capture",on);try{window.gcSetSize&&window.gcSetSize("fit")}catch{}fitCap();if(!on){try{const N=window.GielinorNative;if(N&&N.capture&&fitCap.w){fitCap.w="";N.capture(false)}}catch{}}};applyCap();
-  addEventListener("resize",fitCap);setInterval(fitCap,700);
+  const applyCap=()=>{const on=!!S.capture&&!document.body.classList.contains("overlay");document.body.classList.toggle("capture",on);fitCap.k="";try{window.gcSetSize&&window.gcSetSize("fit")}catch{}fitCap();if(!on){try{const N=window.GielinorNative;if(N&&N.capture&&fitCap.w){fitCap.w="";N.capture(false)}}catch{}}};applyCap();
+  addEventListener("resize",fitCap);
   new MutationObserver(fitCap).observe(document.body,{attributes:true,attributeFilter:["class"]});
   $("ms_cap").onclick=()=>{S.capture=!S.capture;save();applyCap();syncSettings()};
   const sure=(btn,fn)=>{let t=0;btn.onclick=()=>{if(t){clearTimeout(t);t=0;btn.textContent="RESET";fn();return}btn.textContent="SURE?";t=setTimeout(()=>{t=0;btn.textContent="RESET"},3000)}};
