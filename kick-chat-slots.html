@@ -3016,11 +3016,11 @@ body.ov-card #logcard,body.ov-card #gecard,body.ov-board #logcard,body.ov-board 
 #mp_connect .mnote{margin:2px 0!important;font-size:17px!important;line-height:1.15!important}
 #mp_connect #sy_box>.mnote.dim,#mp_connect #sy_box>.mnote:first-child{display:none}#mp_connect #sy_box .mlab{display:none}#mp_connect{justify-content:center;text-align:center}#mp_connect .mrow,#mp_connect .cstat{justify-content:center}#mp_connect .mnote,#mp_connect .mnote.dim{text-align:center}#mp_connect #sy_box .mtxt{text-align:center}#mp_connect #sy_box .mrow{justify-content:center;align-items:center}#mp_connect .mback{align-self:center}
 #mp_connect .cstat{margin-top:10px!important}#mp_connect #sy_msg:empty{display:none}#mp_connect #sy_box .twbtn{padding:5px 14px!important}#mp_connect #sy_box .mtxt{padding:3px 8px!important;margin:1px 0!important;font-size:16px!important}
-/* OBS capture view: the app window shows only the machine on a solid green screen (Window Capture + Chroma Key in OBS) */
-body.capture:not(.menu){background:var(--capkey,#00ff00)!important}
-body.capture:not(.menu) #side,body.capture:not(.menu) #lcol #card,body.capture:not(.menu) #tourneypanel,body.capture:not(.menu) #queuecard,body.capture:not(.menu) #logcard,body.capture:not(.menu) #gecard{display:none!important}
-body.capture:not(.menu) #wrap{grid-template-columns:1fr}
-body.capture:not(.menu) #setup,body.capture:not(.menu) #menubtn{display:none!important}
+/* OBS capture view: the machine is scaled to fill the whole window edge to edge (Window Capture in OBS, no chroma key needed) */
+body.capture{background:#000!important;margin:0!important;padding:0!important;overflow:hidden!important;height:100vh}
+body.capture #side,body.capture #lcol #card,body.capture #tourneypanel,body.capture #queuecard,body.capture #logcard,body.capture #gecard,body.capture #setup,body.capture #menubtn{display:none!important}
+body.capture #machine{width:556px!important;min-width:0!important}
+body.capture #wrap{position:fixed!important;left:0;top:0;margin:0!important;padding:0!important;width:695px!important;grid-template-columns:1fr!important;transform:translate(var(--cx,0px),var(--cy,0px)) scale(var(--cs,1));transform-origin:0 0}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3119,7 +3119,6 @@ body.capture:not(.menu) #setup,body.capture:not(.menu) #menubtn{display:none!imp
           <h3>SETTINGS</h3>
           <div class="srow"><span>Sound</span><button type="button" id="ms_snd">ON</button></div>
           <div class="srow"><span>Volume</span><input type="range" id="ms_vol" min="0" max="100"><b id="ms_vol_v">50%</b></div>
-          <div class="srow"><span>Machine Size</span><select id="ms_size"><option value="fit">Fit Window</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="1.75">175%</option><option value="2">200%</option><option value="2.5">250%</option></select></div>
           <div class="srow"><span>!spin Cooldown</span><input type="range" id="ms_scd" min="0" max="30" step="1"><b id="ms_scd_v">6s</b></div>
           <div class="srow"><span>!free Cooldown</span><input type="range" id="ms_fcd" min="1" max="60" step="1"><b id="ms_fcd_v">5 min</b></div>
           <div class="srow"><span>Pop-up Cards Stay For</span><input type="range" id="ms_pop" min="5" max="60" step="1"><b id="ms_pop_v">12s</b></div>
@@ -3129,8 +3128,7 @@ body.capture:not(.menu) #setup,body.capture:not(.menu) #menubtn{display:none!imp
           <div class="srow"><span>Game Version <b id="ms_ver"></b></span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" id="ms_upd" hidden>CHECK FOR UPDATES</button></span></div>
           <div class="mnote dim" id="ms_updmsg" hidden style="font-size:15px;line-height:1.3;word-break:normal;overflow-wrap:break-word;margin:2px 0 6px"></div>
           <div class="srow"><span>Skip This Menu on Launch</span><button type="button" id="ms_skip">OFF</button></div>
-          <div class="srow"><span>OBS Capture View (machine only)</span><button type="button" id="ms_cap">OFF</button></div>
-          <div class="srow"><span>Capture Key Color</span><button type="button" id="ms_capc">GREEN</button></div>
+          <div class="srow"><span>OBS Capture View (machine fills the window)</span><button type="button" id="ms_cap">OFF</button></div>
           <div class="srow" style="display:none"><span>Data: <b id="ms_folder">Browser storage</b></span><button type="button" id="ms_open" hidden>OPEN FOLDER</button></div>
           <div class="srow" style="display:none"><span>Player Accounts: <b id="ms_acn">0</b></span><button type="button" id="ms_exp">EXPORT</button></div>
           <div class="srow"><span>Reset All GP &amp; XP</span><button type="button" id="ms_reset">RESET</button></div>
@@ -3553,7 +3551,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.12";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.3";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -3593,8 +3591,9 @@ function capGE(){document.querySelectorAll("#gecard .gegrid").forEach(g=>{const 
 {const ge=document.getElementById("gecard");if(ge){new MutationObserver(()=>requestAnimationFrame(capGE)).observe(ge,{childList:true,subtree:true});window.addEventListener("resize",capGE);setTimeout(capGE,500)}}
 /* Machine size: scales ONLY the slot machine (the panels stay as they are). Saved per browser / .exe. */
 (()=>{const KEY="gc_msize",w=document.getElementById("wrap"),m=document.getElementById("machine"),sel=document.getElementById("ms_size");if(!w||!m)return;
-let mode="1";try{mode=Store.get(KEY)||"1"}catch{}
-const apply=()=>{const R=document.documentElement.style;R.setProperty("--gz","1");m.style.width="";w.style.gridTemplateColumns="";w.style.maxWidth="";m.style.width="556px";   /* the machine always starts from its native width, so no layout (overlay, narrow window, single column) can stretch it wider than its real shape */
+let mode="fit";   /* always fits the window: drag the window to resize */
+const apply=()=>{const R=document.documentElement.style;if(document.body.classList.contains("capture")){R.setProperty("--gz","1.25");m.style.width="";w.style.gridTemplateColumns="";w.style.maxWidth="";return}   /* capture view: fixed native size, the whole window is scaled instead */
+  R.setProperty("--gz","1");m.style.width="";w.style.gridTemplateColumns="";w.style.maxWidth="";m.style.width="556px";   /* the machine always starts from its native width, so no layout (overlay, narrow window, single column) can stretch it wider than its real shape */
 void m.offsetWidth;
 let z=1;const nat=m.getBoundingClientRect().width||556,h0=m.getBoundingClientRect().height||436,ov=[...document.body.classList].some(c=>c.startsWith("ov-"));
 if(mode==="fit")z=Math.max(.5,Math.min(ov?(innerWidth-32)/nat:(innerWidth-32-284)/nat,ov?(innerHeight-32)/h0:99,4));else z=(parseFloat(mode)||1)*(ov?1:1.25);   /* the in-game window is 25% larger than before (the OBS overlay keeps its exact size) */
@@ -6741,8 +6740,7 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   let cur="home";
   const statusTxt=()=>($("status").textContent||"Not connected.").trim();
   function syncConnect(){$("mc_room").value=S.room||$("chatroom").value||"";$("mc_status").textContent=statusTxt()}
-  const CAPC={green:["GREEN","#00ff00"],magenta:["MAGENTA","#ff00ff"],blue:["BLUE","#0000ff"]};
-  function syncSettings(){{const fo=Store.folder();$("ms_folder").textContent=fo||"Browser storage";$("ms_folder").style.wordBreak="break-all";$("ms_open").hidden=!fo}$("ms_acn").textContent=Object.keys(window.allAccounts()).length;$("ms_snd").textContent=/off/i.test($("snd").textContent)?"OFF":"ON";$("ms_vol").value=$("vol").value;$("ms_vol_v").textContent=$("vol").value+"%";$("ms_scd").value=S.spinCd;$("ms_scd_v").textContent=S.spinCd+"s";$("ms_fcd").value=S.freeCd;$("ms_fcd_v").textContent=S.freeCd+" min";$("ms_idle").value=S.idle;$("ms_idle_v").textContent=S.idle+"s";$("ms_pop").value=S.popSec;$("ms_popdir").value=S.popDir||"right";$("ms_pop_v").textContent=S.popSec+"s";$("ms_dev").textContent=S.dev?"ON":"OFF";$("ms_skip").textContent=S.skip?"ON":"OFF";$("ms_cap").textContent=S.capture?"ON":"OFF";$("ms_capc").textContent=(CAPC[S.capColor]||CAPC.green)[0]}
+  function syncSettings(){{const fo=Store.folder();$("ms_folder").textContent=fo||"Browser storage";$("ms_folder").style.wordBreak="break-all";$("ms_open").hidden=!fo}$("ms_acn").textContent=Object.keys(window.allAccounts()).length;$("ms_snd").textContent=/off/i.test($("snd").textContent)?"OFF":"ON";$("ms_vol").value=$("vol").value;$("ms_vol_v").textContent=$("vol").value+"%";$("ms_scd").value=S.spinCd;$("ms_scd_v").textContent=S.spinCd+"s";$("ms_fcd").value=S.freeCd;$("ms_fcd_v").textContent=S.freeCd+" min";$("ms_idle").value=S.idle;$("ms_idle_v").textContent=S.idle+"s";$("ms_pop").value=S.popSec;$("ms_popdir").value=S.popDir||"right";$("ms_pop_v").textContent=S.popSec+"s";$("ms_dev").textContent=S.dev?"ON":"OFF";$("ms_skip").textContent=S.skip?"ON":"OFF";$("ms_cap").textContent=S.capture?"ON":"OFF"}
   {const TRO="url(\"data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#ffd24a" stroke="#6b4a00" stroke-width="1" d="M7 3h10v5a5 5 0 0 1-10 0V3Z"/><path fill="none" stroke="#e8a81f" stroke-width="1.6" d="M7 4.5H4v2a3 3 0 0 0 3 3M17 4.5h3v2a3 3 0 0 1-3 3"/><path fill="#ffd24a" stroke="#6b4a00" stroke-width="1" d="M10.5 13h3v3h-3zM8 17h8v3H8z"/><path fill="#fff6c0" d="M9 4.5h1.6v4.2A2.8 2.8 0 0 1 9 6.2Z"/></svg>')+"\")";
     const tb=document.getElementById("ex_tourney");let ti=0;
     const fly=()=>{const t=document.createElement("i"),w=tb.clientWidth||480,s=14+Math.random()*12;t.className="ftro";t.style.setProperty("--tro",TRO);t.style.width=t.style.height=s+"px";t.style.top=(Math.random()*(Math.max(10,tb.clientHeight-s)))+"px";t.style.setProperty("--dx",-(w+s+10)+"px");t.style.setProperty("--rot",(Math.random()*120-60)+"deg");t.style.setProperty("--d",(2.2+Math.random()*1.6)+"s");t.addEventListener("animationend",()=>t.remove());tb.appendChild(t)};
@@ -6963,8 +6961,13 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   $("ms_idle").oninput=e=>{S.idle=+e.target.value;window.DMD_IDLE_MS=S.idle*1000;$("ms_idle_v").textContent=S.idle+"s";save()};
   $("ms_dev").onclick=()=>{S.dev=!S.dev;body.classList.toggle("nodev",!S.dev);save();syncSettings()};
   $("ms_skip").onclick=()=>{S.skip=!S.skip;save();syncSettings()};
-  const applyCap=()=>{document.body.classList.toggle("capture",!!S.capture&&!document.body.classList.contains("overlay"));document.documentElement.style.setProperty("--capkey",(CAPC[S.capColor]||CAPC.green)[1])};applyCap();
-  $("ms_capc").onclick=()=>{const k=Object.keys(CAPC),i=k.indexOf(S.capColor||"green");S.capColor=k[(i+1)%k.length];save();applyCap();syncSettings()};
+  const fitCap=()=>{const b=document.body,R=document.documentElement.style;if(!b.classList.contains("capture")){["--cs","--cx","--cy","--cw"].forEach(k=>R.removeProperty(k));return}
+    const w=695,hh=556,s=Math.min(innerWidth/w,innerHeight/hh);
+    R.setProperty("--cw",w+"px");R.setProperty("--cs",s);R.setProperty("--cx",Math.max(0,(innerWidth-w*s)/2)+"px");R.setProperty("--cy",Math.max(0,(innerHeight-hh*s)/2)+"px");
+    try{const N=window.GielinorNative;if(N&&N.capture&&fitCap.w!==w+"x"+hh){fitCap.w=w+"x"+hh;N.capture(true,w,hh)}}catch{}};
+  const applyCap=()=>{const on=!!S.capture&&!document.body.classList.contains("overlay");document.body.classList.toggle("capture",on);try{window.gcSetSize&&window.gcSetSize("fit")}catch{}fitCap();if(!on){try{const N=window.GielinorNative;if(N&&N.capture&&fitCap.w){fitCap.w="";N.capture(false)}}catch{}}};applyCap();
+  addEventListener("resize",fitCap);setInterval(fitCap,700);
+  new MutationObserver(fitCap).observe(document.body,{attributes:true,attributeFilter:["class"]});
   $("ms_cap").onclick=()=>{S.capture=!S.capture;save();applyCap();syncSettings()};
   const sure=(btn,fn)=>{let t=0;btn.onclick=()=>{if(t){clearTimeout(t);t=0;btn.textContent="RESET";fn();return}btn.textContent="SURE?";t=setTimeout(()=>{t=0;btn.textContent="RESET"},3000)}};
   sure($("ms_reset"),()=>$("reset").click());sure($("ms_lvl"),()=>$("resetlvl").click());
