@@ -3551,7 +3551,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.33";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.32";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -5354,6 +5354,7 @@ if(q.get("chatroom")){$("chatroom").value=q.get("chatroom");connect(q.get("chatr
   if(typeof sv.vol==="number")volume=sv.vol;if(sv.muted)muted=true;
   if(q.get("vol")!==null&&!isNaN(+q.get("vol")))volume=Math.max(0,Math.min(1,+q.get("vol")/100));
   if(q.has("mute"))muted=true;
+  if(document.body.classList.contains("overlay")&&!/^(machine|all)$/.test(q.get("overlay")||""))muted=true;   // card / pop-up / board overlays never make sound (they are just a hidden copy of the game)
   const paint=()=>{$("snd").textContent="Sound: "+(muted?"off":"on");{const mb=$("mutebtn");if(mb){mb.classList.toggle("muted",muted);mb.title=muted?"Unmute sound":"Mute sound"}}$("vol").value=Math.round(volume*100);{const mv=$("machvol");if(mv){mv.value=muted?0:Math.round(volume*100);$("machvolp").textContent=mv.value+"%";$("machvolp").classList.toggle("muted",muted)}}};
   const isOv=document.body.classList.contains("overlay");
   const pub=()=>{if(isOv||!window.GielinorNative)return;try{fetch("/gc-sound",{method:"POST",body:JSON.stringify({vol:volume})}).catch(()=>{})}catch{}};
