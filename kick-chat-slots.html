@@ -3016,6 +3016,11 @@ body.ov-card #logcard,body.ov-card #gecard,body.ov-board #logcard,body.ov-board 
 #mp_connect .mnote{margin:2px 0!important;font-size:17px!important;line-height:1.15!important}
 #mp_connect #sy_box>.mnote.dim,#mp_connect #sy_box>.mnote:first-child{display:none}#mp_connect #sy_box .mlab{display:none}#mp_connect{justify-content:center;text-align:center}#mp_connect .mrow,#mp_connect .cstat{justify-content:center}#mp_connect .mnote,#mp_connect .mnote.dim{text-align:center}#mp_connect #sy_box .mtxt{text-align:center}#mp_connect #sy_box .mrow{justify-content:center;align-items:center}#mp_connect .mback{align-self:center}
 #mp_connect .cstat{margin-top:10px!important}#mp_connect #sy_msg:empty{display:none}#mp_connect #sy_box .twbtn{padding:5px 14px!important}#mp_connect #sy_box .mtxt{padding:3px 8px!important;margin:1px 0!important;font-size:16px!important}
+/* OBS capture view: the app window shows only the machine on a solid green screen (Window Capture + Chroma Key in OBS) */
+body.capture:not(.menu){background:var(--capkey,#00ff00)!important}
+body.capture:not(.menu) #side,body.capture:not(.menu) #lcol #card,body.capture:not(.menu) #tourneypanel,body.capture:not(.menu) #queuecard,body.capture:not(.menu) #logcard,body.capture:not(.menu) #gecard{display:none!important}
+body.capture:not(.menu) #wrap{grid-template-columns:1fr}
+body.capture:not(.menu) #setup,body.capture:not(.menu) #menubtn{display:none!important}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3124,6 +3129,8 @@ body.ov-card #logcard,body.ov-card #gecard,body.ov-board #logcard,body.ov-board 
           <div class="srow"><span>Game Version <b id="ms_ver"></b></span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" id="ms_upd" hidden>CHECK FOR UPDATES</button></span></div>
           <div class="mnote dim" id="ms_updmsg" hidden style="font-size:15px;line-height:1.3;word-break:normal;overflow-wrap:break-word;margin:2px 0 6px"></div>
           <div class="srow"><span>Skip This Menu on Launch</span><button type="button" id="ms_skip">OFF</button></div>
+          <div class="srow"><span>OBS Capture View (machine only)</span><button type="button" id="ms_cap">OFF</button></div>
+          <div class="srow"><span>Capture Key Color</span><button type="button" id="ms_capc">GREEN</button></div>
           <div class="srow" style="display:none"><span>Data: <b id="ms_folder">Browser storage</b></span><button type="button" id="ms_open" hidden>OPEN FOLDER</button></div>
           <div class="srow" style="display:none"><span>Player Accounts: <b id="ms_acn">0</b></span><button type="button" id="ms_exp">EXPORT</button></div>
           <div class="srow"><span>Reset All GP &amp; XP</span><button type="button" id="ms_reset">RESET</button></div>
@@ -3546,7 +3553,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.1";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.12";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -5135,7 +5142,8 @@ const Sync=(()=>{
 /* !link replies go on the jackpot DMD so they grab attention (falls back to the small status line if the DMD is busy) */
 function lsay(user,msg){let ok=false;try{ok=window.jpText&&window.jpText(nm(user)+" "+msg,null,"ACCOUNT LINK!")}catch{}if(!ok)say(user,msg)}
 function onChat(user,text,plat){const w=Sync.ready(user,plat);if(w){w.then(()=>onChat0(user,text,plat));return}return onChat0(user,text,plat)}
-function onChat0(user,text,plat){grantAllOwner(user);
+function onChat0(user,text,plat){if(window.__appGone)return;   // OBS overlay: the Gielinor Casino app was closed, so commands pause (nothing would save them)
+  grantAllOwner(user);
   if(plat&&plat!=="demo")userPlat[user]=plat;
   let p=text.trim().toLowerCase().split(/\s+/);
   if(selMode&&selMode.user===user&&card.user===user&&p.every(x=>/^\d+$/.test(x))&&p.length<=3)p=[EQK[selMode.kind].c].concat(p);   // typing just the number(s) while selecting
@@ -5337,6 +5345,10 @@ if(q.get("overlay")==="popups"){
     fit(el);
     el.style.zIndex=++z;el.classList.add("popin");clearTimeout(tm[id]);tm[id]=setTimeout(()=>{el.classList.remove("popin");if(!document.querySelector(".panel.popin"))owner=null},secs*1000)};
 }
+/* app watchdog: an OBS overlay loaded from the .exe's local server pauses commands while the app is closed */
+(function(){if(!document.body.classList.contains("overlay")||window.GielinorNative||location.hostname!=="127.0.0.1")return;
+  let seen=false,fails=0;const ping=()=>fetch("/gc-sound",{cache:"no-store"}).then(r=>{if(!r.ok)throw 0;seen=true;fails=0;window.__appGone=false}).catch(()=>{if(seen&&++fails>=2)window.__appGone=true});
+  ping();setInterval(ping,3000)})();
 if(q.get("chatroom")){$("chatroom").value=q.get("chatroom");connect(q.get("chatroom"))}
 (function sound(){
   let sv={};try{sv=JSON.parse(Store.get("kickSlotsSnd")||"{}")}catch{}
@@ -5344,7 +5356,11 @@ if(q.get("chatroom")){$("chatroom").value=q.get("chatroom");connect(q.get("chatr
   if(q.get("vol")!==null&&!isNaN(+q.get("vol")))volume=Math.max(0,Math.min(1,+q.get("vol")/100));
   if(q.has("mute"))muted=true;
   const paint=()=>{$("snd").textContent="Sound: "+(muted?"off":"on");{const mb=$("mutebtn");if(mb){mb.classList.toggle("muted",muted);mb.title=muted?"Unmute sound":"Mute sound"}}$("vol").value=Math.round(volume*100);{const mv=$("machvol");if(mv){mv.value=muted?0:Math.round(volume*100);$("machvolp").textContent=mv.value+"%";$("machvolp").classList.toggle("muted",muted)}}};
-  const keep=()=>{try{Store.set("kickSlotsSnd",JSON.stringify({vol:volume,muted}))}catch{}};
+  const isOv=document.body.classList.contains("overlay");
+  const pub=()=>{if(isOv||!window.GielinorNative)return;try{fetch("/gc-sound",{method:"POST",body:JSON.stringify({vol:volume})}).catch(()=>{})}catch{}};
+  const keep=()=>{try{Store.set("kickSlotsSnd",JSON.stringify({vol:volume,muted}))}catch{};pub()};
+  if(isOv&&!q.has("vol")){const pull=()=>{fetch("/gc-sound",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(j&&typeof j.vol==="number"&&Math.abs(j.vol-volume)>.001){volume=j.vol;applyVol();try{paint()}catch{}}}).catch(()=>{})};pull();setInterval(pull,1500)}
+  else pub();
   $("mutebtn").onclick=e=>{e.stopPropagation();$("snd").click()};
   $("snd").onclick=()=>{muted=!muted;applyVol();paint();keep();if(!muted){ac();tone(880,0,.1,"sine",.12)}};
   $("machvol").onpointerup=e=>e.target.blur();
@@ -6725,7 +6741,8 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   let cur="home";
   const statusTxt=()=>($("status").textContent||"Not connected.").trim();
   function syncConnect(){$("mc_room").value=S.room||$("chatroom").value||"";$("mc_status").textContent=statusTxt()}
-  function syncSettings(){{const fo=Store.folder();$("ms_folder").textContent=fo||"Browser storage";$("ms_folder").style.wordBreak="break-all";$("ms_open").hidden=!fo}$("ms_acn").textContent=Object.keys(window.allAccounts()).length;$("ms_snd").textContent=/off/i.test($("snd").textContent)?"OFF":"ON";$("ms_vol").value=$("vol").value;$("ms_vol_v").textContent=$("vol").value+"%";$("ms_scd").value=S.spinCd;$("ms_scd_v").textContent=S.spinCd+"s";$("ms_fcd").value=S.freeCd;$("ms_fcd_v").textContent=S.freeCd+" min";$("ms_idle").value=S.idle;$("ms_idle_v").textContent=S.idle+"s";$("ms_pop").value=S.popSec;$("ms_popdir").value=S.popDir||"right";$("ms_pop_v").textContent=S.popSec+"s";$("ms_dev").textContent=S.dev?"ON":"OFF";$("ms_skip").textContent=S.skip?"ON":"OFF"}
+  const CAPC={green:["GREEN","#00ff00"],magenta:["MAGENTA","#ff00ff"],blue:["BLUE","#0000ff"]};
+  function syncSettings(){{const fo=Store.folder();$("ms_folder").textContent=fo||"Browser storage";$("ms_folder").style.wordBreak="break-all";$("ms_open").hidden=!fo}$("ms_acn").textContent=Object.keys(window.allAccounts()).length;$("ms_snd").textContent=/off/i.test($("snd").textContent)?"OFF":"ON";$("ms_vol").value=$("vol").value;$("ms_vol_v").textContent=$("vol").value+"%";$("ms_scd").value=S.spinCd;$("ms_scd_v").textContent=S.spinCd+"s";$("ms_fcd").value=S.freeCd;$("ms_fcd_v").textContent=S.freeCd+" min";$("ms_idle").value=S.idle;$("ms_idle_v").textContent=S.idle+"s";$("ms_pop").value=S.popSec;$("ms_popdir").value=S.popDir||"right";$("ms_pop_v").textContent=S.popSec+"s";$("ms_dev").textContent=S.dev?"ON":"OFF";$("ms_skip").textContent=S.skip?"ON":"OFF";$("ms_cap").textContent=S.capture?"ON":"OFF";$("ms_capc").textContent=(CAPC[S.capColor]||CAPC.green)[0]}
   {const TRO="url(\"data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#ffd24a" stroke="#6b4a00" stroke-width="1" d="M7 3h10v5a5 5 0 0 1-10 0V3Z"/><path fill="none" stroke="#e8a81f" stroke-width="1.6" d="M7 4.5H4v2a3 3 0 0 0 3 3M17 4.5h3v2a3 3 0 0 1-3 3"/><path fill="#ffd24a" stroke="#6b4a00" stroke-width="1" d="M10.5 13h3v3h-3zM8 17h8v3H8z"/><path fill="#fff6c0" d="M9 4.5h1.6v4.2A2.8 2.8 0 0 1 9 6.2Z"/></svg>')+"\")";
     const tb=document.getElementById("ex_tourney");let ti=0;
     const fly=()=>{const t=document.createElement("i"),w=tb.clientWidth||480,s=14+Math.random()*12;t.className="ftro";t.style.setProperty("--tro",TRO);t.style.width=t.style.height=s+"px";t.style.top=(Math.random()*(Math.max(10,tb.clientHeight-s)))+"px";t.style.setProperty("--dx",-(w+s+10)+"px");t.style.setProperty("--rot",(Math.random()*120-60)+"deg");t.style.setProperty("--d",(2.2+Math.random()*1.6)+"s");t.addEventListener("animationend",()=>t.remove());tb.appendChild(t)};
@@ -6739,7 +6756,7 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
     const top=Tourney.top(10);ls.innerHTML=top.length?top.map(([u,s],i)=>'<li><span class="tr">#'+(i+1)+'</span><span class="tn">'+esc(dn(u))+'</span><span class="tr">'+s.spins.toLocaleString("en-US")+(s.spins===1?' spin':' spins')+'</span><span class="tg">'+s.won.toLocaleString("en-US")+' gp</span></li>').join(""):'<li class="te">No scores yet.</li>'}
   $("tn_start").onclick=()=>{Tourney.start();renderTn()};$("tn_end").onclick=()=>{Tourney.end();renderTn()};$("tn_reset").onclick=()=>{Tourney.clear();renderTn()};
   setInterval(()=>{if(cur==="tournament"&&!mv.hidden)renderTn()},2000);
-  function baseUrl(m){let u=location.href.split(/[?#]/)[0]+"?overlay="+m;if(m==="popups")u+="&pop="+S.popSec+"&dir="+(S.popDir||"right");return S.room?u+"&chatroom="+S.room:u}
+  function baseUrl(m){let u=location.href.split(/[?#]/)[0]+"?overlay="+m;if(m==="popups")u+="&pop="+S.popSec+"&dir="+(S.popDir||"right");if(S.room)u+="&chatroom="+S.room;try{const tl=(JSON.parse(Store.get("kickSlotsTwitch")||"{}")||{}).login;if(tl)u+="&twitch="+encodeURIComponent(tl)}catch{}return u}
   function show(p){cur=p;if(p!=="spinsnd")try{window.stopSpinPreview()}catch{}$("menupane").hidden=true;mv.classList.toggle("homev",p==="home");mv.classList.toggle("sub",p!=="home");body.classList.toggle("menusub",p!=="home");Object.entries(panes).forEach(([k,e])=>e.hidden=k!==p);navBtns.forEach(b=>b.classList.toggle("on",b.dataset.m===p));
     if(p==="tournament")renderTn();if(p==="connect")syncConnect();if(p==="settings"){syncSettings();paintRanges()}if(p==="overlays")$("ov_url").textContent=baseUrl("machine")}
   function open(){window.DMD_MENU=true;body.classList.add("menu");mv.hidden=false;studs=null;$("who").innerHTML="Welcome to <b>Gielinor Casino</b>";$("result").textContent="";show("home");mv.style.height="";if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
@@ -6786,6 +6803,8 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
     w.onerror=()=>{let framed=false;try{framed=window.self!==window.top}catch{framed=true}setStatus("Twitch connection failed.");tstat(framed?"Connection failed. This looks like an embedded preview, which blocks outside connections. Open the file directly in Chrome (or an OBS browser source) and try again.":"Connection failed. Check your internet connection and the channel name, then try again.")};
     w.onclose=()=>{if(tws===w){tconn=false;twUI();const again=twWant,an=twAnon;if(again){const d=Math.min(60000,2000*Math.pow(2,twTry++));setStatus("Twitch chat dropped. Reconnecting in "+Math.round(d/1000)+"s…");tstat("Connection dropped. Reconnecting automatically…");clearTimeout(twRT);twRT=setTimeout(()=>{if(!tconn)twConnect(an||undefined)},d)}else{setStatus("Disconnected from Twitch.");tstat("Disconnected from Twitch chat.")}}};
   }
+  /* OBS overlays: listen to the streamer's Twitch chat too (read-only, no login needed) */
+  if(document.body.classList.contains("overlay")&&/^\w{2,25}$/.test(q.get("twitch")||"")){setTimeout(()=>twConnect(q.get("twitch").toLowerCase()),400)}
   /* One-click sign-in (device code flow): the game asks the shared server for a code, opens the Twitch page where the player just clicks Authorize, then collects the login by itself. No app setup, no secrets on the player's PC. */
   const SRV=()=>{try{return String(Sync.C.url||"").replace(/\/+$/,"")}catch{return ""}};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -6944,6 +6963,9 @@ document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.v
   $("ms_idle").oninput=e=>{S.idle=+e.target.value;window.DMD_IDLE_MS=S.idle*1000;$("ms_idle_v").textContent=S.idle+"s";save()};
   $("ms_dev").onclick=()=>{S.dev=!S.dev;body.classList.toggle("nodev",!S.dev);save();syncSettings()};
   $("ms_skip").onclick=()=>{S.skip=!S.skip;save();syncSettings()};
+  const applyCap=()=>{document.body.classList.toggle("capture",!!S.capture&&!document.body.classList.contains("overlay"));document.documentElement.style.setProperty("--capkey",(CAPC[S.capColor]||CAPC.green)[1])};applyCap();
+  $("ms_capc").onclick=()=>{const k=Object.keys(CAPC),i=k.indexOf(S.capColor||"green");S.capColor=k[(i+1)%k.length];save();applyCap();syncSettings()};
+  $("ms_cap").onclick=()=>{S.capture=!S.capture;save();applyCap();syncSettings()};
   const sure=(btn,fn)=>{let t=0;btn.onclick=()=>{if(t){clearTimeout(t);t=0;btn.textContent="RESET";fn();return}btn.textContent="SURE?";t=setTimeout(()=>{t=0;btn.textContent="RESET"},3000)}};
   sure($("ms_reset"),()=>$("reset").click());sure($("ms_lvl"),()=>$("resetlvl").click());
   // in-game menu button + keyboard
