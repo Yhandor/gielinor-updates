@@ -3026,6 +3026,8 @@ body.capture #wrap{position:fixed!important;left:var(--cx,0px);top:var(--cy,0px)
 .bdgs{flex-shrink:0}
 /* Performance "Lite": drops the purely decorative always-on animations */
 body.lite .bulbs i,body.lite .reel,body.lite .sreel,body.lite #bbox,body.lite #glass,body.lite #title,body.lite #cclub,body.lite .fpv,body.lite .tsp i,body.lite #rays{animation:none!important}
+/* Lite: also stop the always-running decorative loops (glass sheen, title shine, attract-mode glow/blink, trophy flicker): each one repaints on every frame */
+body.lite .reel::after,body.lite .sreel::after,body.lite #bbox::after,body.lite #glass::before,body.lite #machine.attract,body.lite #machine.attract #reels,body.lite #machine.attract #reels::before,body.lite #machine.attract #reels::after,body.lite #title>span,body.lite #ctitle>span,body.lite #btitle span,body.lite #ttitle span,body.lite #qtitle span,body.lite .xpwrap .xl,body.lite #title img,body.lite #btitle img,body.lite #card[class*="th-"] #chead #clubcard span,body.lite #clubcard #cclub{animation:none!important}
 #ms_perf,#ms_gpu{background:#1c150c;color:#ffe27a;border:2px solid #6e5d41;font:inherit;padding:2px 6px}
 
 /* GP leaderboard scroller: names are plain coloured text (no per-row shimmer / filter), so ~100 rows no longer repaint every frame while scrolling */
@@ -3656,7 +3658,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.98";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.99";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -5272,7 +5274,10 @@ function onChat0(user,text,plat){if(window.__appGone)return;
   /* OBS card overlays only hold a copy of the app's data from when they loaded. The moment a card command arrives, check whether the app has saved anything newer; if so reload with fresh data and replay this one command, so the card never shows old numbers. */
   if(window.__viewOnly&&!window.__replaying&&/^!(playercard|skillcard|petcard|log|collectionlog|ge|shop)(\s|$)/i.test(String(text).trim())){
     try{const x=new XMLHttpRequest();x.open("GET","/gc-version",false);x.send();const j=JSON.parse(x.responseText);
-      if(j&&j.v!==window.__snapV){sessionStorage.setItem("gcPend",JSON.stringify({u:user,t:text,p:plat,at:Date.now()}));location.reload();return}}catch{}}
+      if(j&&j.v!==window.__snapV){
+        /* something was saved since this overlay loaded. Reloading costs a full page start (about a second of CPU), so only do it if THIS player's saved data actually changed */
+        let same=false;try{const y=new XMLHttpRequest();y.open("GET","/gc-snapshot",false);y.send();const d=JSON.parse(y.responseText),fp=(f,u)=>{const o=[];for(const k of Object.keys(f||{}).sort()){if(/^(secrets|pfp-cache)/.test(k))continue;try{const q=JSON.parse(f[k]);if(q&&typeof q==="object"&&!Array.isArray(q)&&Object.prototype.hasOwnProperty.call(q,u))o.push(k+"="+JSON.stringify(q[u]))}catch{}}return o.join("|")},a1=fp(d.files,user),a0=fp(window.__snap,user);same=!!a1&&a1===a0}catch{}
+        if(!same){sessionStorage.setItem("gcPend",JSON.stringify({u:user,t:text,p:plat,at:Date.now()}));location.reload();return}}}catch{}}
    // OBS overlay: the Gielinor Casino app was closed, so commands pause (nothing would save them)
   grantAllOwner(user);
   if(plat&&plat!=="demo")userPlat[user]=plat;
@@ -5489,13 +5494,14 @@ if(q.get("overlay")!==null||q.get("chatroom"))document.body.classList.add("overl
    a card slides in when its chat command is used, stays for the set time, then slides back out ---- */
 if(q.get("overlay")==="popups"){
   const MAP={"!playercard":"card","!skillcard":"skillcard","!petcard":"petcard","!log":"logcard","!collectionlog":"logcard","!ge":"gecard","!shop":"gecard"};
-  let secs=Math.max(3,Math.min(120,parseFloat(q.get("pop"))||12));const DIR=["left","right","up","down"].includes(q.get("dir"))?q.get("dir"):"right",OFF={left:"translateX(-100vw)",right:"translateX(100vw)",up:"translateY(-100vh)",down:"translateY(100vh)"}[DIR],PAD=24;   // cards sit centred, with the same gap on all four sides (and shrink if the source is too small for card + gap)
+  let secs=Math.max(3,Math.min(120,parseFloat(q.get("pop"))||12));const DIR=["left","right","up","down"].includes(q.get("dir"))?q.get("dir"):"right",OFFS={left:"translateX(-100vw)",right:"translateX(100vw)",up:"translateY(-100vh)",down:"translateY(100vh)"},PAD=24;document.body.style.setProperty("--off",OFFS[DIR]);   // cards sit centred, with the same gap on all four sides (and shrink if the source is too small for card + gap)
   const st=document.createElement("style");
   st.textContent="html:has(body.ov-popups),body.ov-popups{overflow:hidden!important}body.ov-popups #wrap,body.ov-popups #lcol,body.ov-popups #side{display:block!important;max-width:none!important;margin:0;padding:0}body.ov-popups #machine,body.ov-popups #mcard,body.ov-popups #boardpanel,body.ov-popups #tourneypanel,body.ov-popups #queuecard{display:none!important}"+
-   "body.ov-popups #card,body.ov-popups #skillcard,body.ov-popups #petcard,body.ov-popups #logcard,body.ov-popups #gecard{position:absolute!important;top:50%;left:50%;margin:0!important;opacity:0;transform:translate(-50%,-50%) "+OFF+" scale(var(--ps,1));pointer-events:none;transition:transform .55s cubic-bezier(.2,.9,.25,1.05),opacity .4s}"+
+   "body.ov-popups #card,body.ov-popups #skillcard,body.ov-popups #petcard,body.ov-popups #logcard,body.ov-popups #gecard{position:absolute!important;top:50%;left:50%;margin:0!important;opacity:0;transform:translate(-50%,-50%) var(--off) scale(var(--ps,1));pointer-events:none;transition:transform .55s cubic-bezier(.2,.9,.25,1.05),opacity .4s}"+
    "body.ov-popups .panel.popin{opacity:1!important;transform:translate(-50%,-50%) scale(var(--ps,1))!important}";
   /* the "Pop-up time" setting in the app applies live: the app shares it with this overlay (so the link does not have to be re-copied) */
-  if(!window.GielinorNative&&location.hostname==="127.0.0.1"){const pull=()=>fetch("/gc-sound",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(j&&typeof j.popSec==="number")secs=Math.max(3,Math.min(120,j.popSec))}).catch(()=>{});pull();setInterval(pull,3000)}
+  if(!window.GielinorNative&&location.hostname==="127.0.0.1"){const pull=()=>{fetch("/gc-sound",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(j&&typeof j.popSec==="number")secs=Math.max(3,Math.min(120,j.popSec))}).catch(()=>{});
+      fetch("/gc-file?f=settings",{cache:"no-store"}).then(r=>r.text()).then(t=>{try{const d=JSON.parse(t).popDir;if(OFFS[d])document.body.style.setProperty("--off",OFFS[d])}catch{}}).catch(()=>{})};pull();setInterval(pull,3000)}   // slide direction also follows the Settings choice live
   document.head.appendChild(st);
   const tm={};let z=10,owner=null,until=0;
   /* one player at a time: while a card is showing, other players' card commands are ignored until it slides out (admins can still use them) */
@@ -5509,7 +5515,7 @@ if(q.get("overlay")==="popups"){
 /* view-only overlays reload when the app's data changed (pop-ups only while no card is showing, so it is invisible; always-visible overlays at most every 30 s) */
 if(window.__viewOnly){try{const o=JSON.parse(sessionStorage.getItem("gcPend")||"null");sessionStorage.removeItem("gcPend");
   if(o&&Date.now()-o.at<12000)setTimeout(()=>{window.__replaying=true;try{onChat(o.u,o.t,o.p)}finally{window.__replaying=false}},500)}catch{}}
-if(window.__viewOnly&&window.__snapV!==null){const born=Date.now();setInterval(()=>fetch("/gc-version",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(!j||j.v===window.__snapV)return;if(document.body.classList.contains("ov-board")&&Date.now()-born<600000){return fetch("/gc-snapshot",{cache:"no-store"}).then(r=>r.json()).then(d=>{if(!d||!d.files)return;window.__snap=d.files;window.__snapV=d.v;try{if(d.files.bank)bank=JSON.parse(d.files.bank)}catch{}try{if(d.files.xp)xp=JSON.parse(d.files.xp)}catch{}board()})}const pop=document.body.classList.contains("ov-popups"),idle=!document.querySelector(".panel.popin"),age=Date.now()-born;if((pop&&idle&&age>4000)||(!pop&&age>30000))location.reload()}).catch(()=>{}),2500)}
+if(window.__viewOnly&&window.__snapV!==null){const born=Date.now();setInterval(()=>fetch("/gc-version",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(!j||j.v===window.__snapV)return;if(document.body.classList.contains("ov-board")&&Date.now()-born<600000){return fetch("/gc-snapshot",{cache:"no-store"}).then(r=>r.json()).then(d=>{if(!d||!d.files)return;window.__snap=d.files;window.__snapV=d.v;try{if(d.files.bank)bank=JSON.parse(d.files.bank)}catch{}try{if(d.files.xp)xp=JSON.parse(d.files.xp)}catch{}board()})}/* no background reload any more: reloading every overlay at once after each save was the CPU spike. Card commands check for fresh data themselves (above). */}).catch(()=>{}),2500)}
 /* app watchdog: an OBS overlay loaded from the .exe's local server pauses commands while the app is closed */
 (function(){if(!document.body.classList.contains("overlay")||window.GielinorNative||location.hostname!=="127.0.0.1")return;
   let seen=false,fails=0;const ping=()=>fetch("/gc-sound",{cache:"no-store"}).then(r=>{if(!r.ok)throw 0;seen=true;fails=0;window.__appGone=false}).catch(()=>{if(seen&&++fails>=2)window.__appGone=true});
