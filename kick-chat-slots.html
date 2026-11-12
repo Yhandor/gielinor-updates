@@ -3076,6 +3076,25 @@ body.ov-tourneypanel #wrap{grid-template-columns:1fr!important;max-width:390px!i
 </style></head>
 <body>
 <script>try{var o_=(location.search.match(/[?&]overlay=([^&]*)/)||[])[1];if(o_){document.body.classList.add("ov-"+decodeURIComponent(o_));if(!/^(machine|all)$/.test(o_)){var h_=document.createElement("style");h_.id="ovhide";h_.textContent="html{visibility:hidden!important}";document.head.appendChild(h_);var r_=function(){requestAnimationFrame(function(){requestAnimationFrame(function(){h_.remove()})})};document.addEventListener("DOMContentLoaded",r_);setTimeout(function(){h_.remove()},4000)}}}catch(e){}</script>   <!-- overlay sources get their ov- class before anything paints, so a reload never flashes the machine -->
+<script>
+/* PERF REPORT (diagnostic): add &perf=1 to any overlay address, or press the PERF REPORT button in Settings. Shows which timers / animation loops use the most time, so slow spots can be found on any computer. Does nothing unless switched on. */
+(function(){var on=/[?&]perf=1/.test(location.search);try{if(sessionStorage.getItem("gcPerf")==="1")on=true}catch(e){}
+  var acc={},t0=performance.now(),frames=0,box=null,long=0;
+  function lab(f,k){try{return k+": "+(f.name||String(f).replace(/\s+/g," ").slice(0,70))}catch(e){return k}}
+  function wrap(f,k){if(typeof f!=="function")return f;var L=null;return function(){if(!window.__gcPerfOn)return f.apply(this,arguments);var a=performance.now();try{return f.apply(this,arguments)}finally{L=L||lab(f,k);var o=acc[L]||(acc[L]={ms:0,n:0});o.ms+=performance.now()-a;o.n++}}}
+  var si=window.setInterval,st=window.setTimeout,raf=window.requestAnimationFrame;
+  window.setInterval=function(f,d){var a=[].slice.call(arguments);a[0]=wrap(f,"interval "+d+"ms");return si.apply(window,a)};
+  window.setTimeout=function(f,d){var a=[].slice.call(arguments);a[0]=wrap(f,"timeout");return st.apply(window,a)};
+  try{new PerformanceObserver(function(l){long+=l.getEntries().length}).observe({entryTypes:["longtask"]})}catch(e){}
+  function show(){window.__gcPerfOn=true;if(box)return;box=document.createElement("pre");box.style.cssText="position:fixed;left:4px;bottom:4px;z-index:2147483647;margin:0;padding:6px 8px;background:rgba(0,0,0,.85);color:#7dff7d;font:12px/1.25 monospace;max-width:96vw;white-space:pre-wrap;pointer-events:none";document.body.appendChild(box);acc={};t0=performance.now();var cur=window.requestAnimationFrame;window.requestAnimationFrame=function(f){return cur.call(window,wrap(f,"frame"))};   /* installed now, i.e. after the frame-rate governor, so the real callbacks are named */
+    (function tick(){frames++;raf.call(window,tick)})();
+    setInterval(function(){var el=(performance.now()-t0)/1000,rows=Object.keys(acc).map(function(k){return[k,acc[k].ms/el,acc[k].n/el]}).sort(function(a,b){return b[1]-a[1]}),tot=rows.reduce(function(s,r){return s+r[1]},0);
+      box.textContent="PERF "+location.search.replace(/^\?/,"")+"  "+(frames/el).toFixed(0)+" fps  long tasks "+long+"\nscript total "+(tot/10).toFixed(1)+"% of one core (ms per second /10)\n"+rows.slice(0,8).map(function(r){return(r[1]/10).toFixed(1).padStart(5)+"%  "+r[2].toFixed(0).padStart(4)+"/s  "+r[0]}).join("\n");
+      if(el>10){acc={};t0=performance.now();frames=0;long=0}},1500)}
+  window.gcPerfToggle=function(){var v=!window.__gcPerfOn;try{sessionStorage.setItem("gcPerf",v?"1":"0")}catch(e){}if(v)show();else{window.__gcPerfOn=false;if(box){box.remove();box=null}}};
+  if(on){window.__gcPerfOn=true;document.addEventListener("DOMContentLoaded",show)}
+})();
+</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
  <filter id="firefx3" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.07 0.16" numOctaves="2" seed="4" result="n"><animate attributeName="baseFrequency" dur="2.2s" values="0.07 0.16;0.085 0.21;0.06 0.13;0.07 0.16" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter>
  <filter id="firefx4" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.05 0.12" numOctaves="2" seed="11" result="n"><animate attributeName="baseFrequency" dur="3.1s" values="0.05 0.12;0.04 0.17;0.065 0.1;0.05 0.12" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="12" xChannelSelector="G" yChannelSelector="R"/></filter>
@@ -3190,6 +3209,7 @@ body.ov-tourneypanel #wrap{grid-template-columns:1fr!important;max-width:390px!i
           <div class="srow" style="display:none"><span>Data: <b id="ms_folder">Browser storage</b></span><button type="button" id="ms_open" hidden>OPEN FOLDER</button></div>
           <div class="srow" style="display:none"><span>Player Accounts: <b id="ms_acn">0</b></span><button type="button" id="ms_exp">EXPORT</button></div>
           <div class="srow"><span>Shop Prices</span><button type="button" id="ms_prices">EDIT</button></div>
+           <div class="srow"><span>Performance Report (shows what uses CPU)</span><button type="button" id="ms_perfrep">SHOW</button></div>
            <div class="srow"><span>Reset All GP &amp; XP</span><button type="button" id="ms_reset">RESET</button></div>
           <div class="srow"><span>Reset Levels Only</span><button type="button" id="ms_lvl">RESET</button></div>
         </div>
@@ -3636,7 +3656,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.91";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.95";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -7940,7 +7960,7 @@ const open=()=>{box.innerHTML='<div class="pbox"><h2>Shop prices (gp)</h2>'+grou
   box.querySelector("#prcancel").onclick=()=>box.classList.remove("on");
   box.querySelector("#prreset").onclick=()=>{saved={};try{Store.set(K,"{}")}catch{}apply(saved);open()};
   box.querySelector("#prsave").onclick=()=>{const m={};box.querySelectorAll("input").forEach(i=>{const v=i.value.trim();if(v!==""&&+v>=0)m[i.dataset.n]=Math.round(+v)});saved=m;try{Store.set(K,JSON.stringify(m))}catch{}apply(m);box.classList.remove("on")}};
-const b=document.getElementById("testprices");if(b)b.onclick=open;const b2=document.getElementById("ms_prices");if(b2)b2.onclick=open;
+const b=document.getElementById("testprices");if(b)b.onclick=open;const b2=document.getElementById("ms_prices");if(b2)b2.onclick=open;const b3=document.getElementById("ms_perfrep");if(b3)b3.onclick=()=>{try{window.gcPerfToggle()}catch{}};
 box.addEventListener("click",e=>{if(e.target===box)box.classList.remove("on")});
 })();
 </script>
