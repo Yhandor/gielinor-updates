@@ -3075,6 +3075,7 @@ body.ov-queuecard #queuecard{width:390px!important;max-width:390px!important}
 body.ov-tourneypanel #wrap{grid-template-columns:1fr!important;max-width:390px!important}body.ov-tourneypanel #tourneypanel{width:390px!important;max-width:390px!important}
 </style></head>
 <body>
+<script>try{var o_=(location.search.match(/[?&]overlay=([^&]*)/)||[])[1];if(o_){document.body.classList.add("ov-"+decodeURIComponent(o_));if(!/^(machine|all)$/.test(o_)){var h_=document.createElement("style");h_.id="ovhide";h_.textContent="html{visibility:hidden!important}";document.head.appendChild(h_);var r_=function(){requestAnimationFrame(function(){requestAnimationFrame(function(){h_.remove()})})};document.addEventListener("DOMContentLoaded",r_);setTimeout(function(){h_.remove()},4000)}}}catch(e){}</script>   <!-- overlay sources get their ov- class before anything paints, so a reload never flashes the machine -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
  <filter id="firefx3" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.07 0.16" numOctaves="2" seed="4" result="n"><animate attributeName="baseFrequency" dur="2.2s" values="0.07 0.16;0.085 0.21;0.06 0.13;0.07 0.16" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter>
  <filter id="firefx4" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.05 0.12" numOctaves="2" seed="11" result="n"><animate attributeName="baseFrequency" dur="3.1s" values="0.05 0.12;0.04 0.17;0.065 0.1;0.05 0.12" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="12" xChannelSelector="G" yChannelSelector="R"/></filter>
@@ -3630,7 +3631,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.81";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.88";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -7912,7 +7913,7 @@ setInterval(centerTitle,500);setTimeout(centerTitle,300);
 mkIcon();(function raf(){try{frame()}catch{}requestAnimationFrame(raf)})();
 setInterval(()=>{if(!msgT0&&Date.now()-lastMsg>120000&&iconCols)showMsg()},1000);
 catchUp();draw();save();
-setInterval(()=>{catchUp();draw();save()},1000);
+let svN=0;setInterval(()=>{catchUp();draw();if(++svN%60===0)save()},1000);   // saved once a minute, not every second: the saved jackpot catches up from its own timestamp, and a file changing every second made the OBS overlays think the game data changed and reload in a loop
 window.jackpotValue=()=>{catchUp();return J.v};
 window.jackpotPay=()=>{catchUp();const v=J.v;J={v:BASE,t:Date.now()};save();setTimeout(showMsg,4000);return v};
 })();
