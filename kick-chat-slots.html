@@ -3397,7 +3397,8 @@ window.gcFresh=keys=>{if(!window.__viewOnly)return Promise.resolve();window.__sn
   window.requestAnimationFrame=cb=>{if(!iv)return raf(cb);const id=++vid,w=t=>{if(!map.has(id))return;if(t===gate||t-gate>=iv){gate=t;map.delete(id);cb(t)}else map.set(id,raf(w))};map.set(id,raf(w));return id};
   window.cancelAnimationFrame=id=>{if(map.has(id)){caf(map.get(id));map.delete(id)}else caf(id)};
   const MODES={smooth:[0,0],balanced:[30,0],lite:[20,1]};
-  window.gcApplyPerf=m=>{const c=MODES[m]||MODES.balanced;iv=c[0]?1000/c[0]-3:0;document.body.classList.toggle("lite",!!c[1])};
+  window.gcApplyPerf=m=>{const c=MODES[m]||MODES.balanced;iv=c[0]?1000/c[0]-3:0;if(/(^|\s)ov-/.test(document.body.className)&&!/(^|\s)ov-(machine|all)(\s|$)/.test(document.body.className))iv=Math.max(iv,47);   /* OBS overlays that do not show the machine: 20 fps is plenty */
+  document.body.classList.toggle("lite",!!c[1])};
   let m="";try{m=JSON.parse(Store.get("kickSlotsSettings")||"{}").perf||""}catch{}
   if(!m){   /* nothing chosen yet: pick a sensible default for this computer. No/weak graphics card (software drawing) -> Lite; few CPU cores -> Balanced; otherwise Smooth. Choosing one in Settings always wins. */
     m="smooth";try{const cv=document.createElement("canvas"),gl=cv.getContext("webgl")||cv.getContext("experimental-webgl"),ex=gl&&gl.getExtension("WEBGL_debug_renderer_info"),r=String(ex?gl.getParameter(ex.UNMASKED_RENDERER_WEBGL):"");
@@ -3635,7 +3636,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.89";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.91";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -6729,13 +6730,18 @@ function slotMachine(ox,flip,t,phase){
   d(0,by,"#ff3b2a");d(1,by,"#ff3b2a");d(0,by+1,"#b01010");d(1,by+1,"#b01010");d(0,by,"#ff9a8a",.9);
 }
 let SID="",L2s=[];
+let offC=null,offKey="";
+/* the grid of unlit dots is the same every frame, so it is drawn once and copied (it used to be ~2,000 separate circles per frame, which was most of the display's CPU cost) */
+function drawOff(){const k=cv.width+"x"+cv.height+"|"+cssD+"|"+P+"|"+N+"|"+OFF;
+  if(k!==offKey||!offC){offKey=k;offC=document.createElement("canvas");offC.width=cv.width;offC.height=cv.height;const g=offC.getContext("2d");g.setTransform(cssD,0,0,cssD,0,0);g.fillStyle=OFF;g.beginPath();for(let r=0;r<ROWS;r++)for(let c=0;c<N;c++){g.moveTo((c+.5)*P+P*.26,(r+.5)*P);g.arc((c+.5)*P,(r+.5)*P,P*.26,0,6.2832)}g.fill()}
+  cx.save();cx.setTransform(1,0,0,1,0,0);cx.globalAlpha=1;cx.drawImage(offC,0,0);cx.restore()}
 function frameBody(now){
   size();
   const k=who.innerHTML+"|"+res.textContent+"|"+res.style.color;
   if(k!==key){const first=key==='';key=k;t0=now;if(!first)lastAct=now;L1=build(segsOf(who),true);const rc=res.textContent?colOf(res):BASE;L2=build(res.textContent?[{t:res.textContent,c:rc}]:[]);L2s=build(res.textContent?[{t:res.textContent,c:rc}]:[],true)}
   const el=now-t0;
   cx.globalAlpha=1;cx.fillStyle="#050100";cx.fillRect(0,0,cssW,ROWS*P);
-  cx.fillStyle=OFF;for(let r=0;r<ROWS;r++)for(let c=0;c<N;c++){cx.beginPath();cx.arc((c+.5)*P,(r+.5)*P,P*.26,0,6.2832);cx.fill()}
+  drawOff();
   if(bst&&boostScene(now)){SID="boost";cx.globalAlpha=1;return}
   if(pmg&&petGameScene(now)){SID="petgame";cx.globalAlpha=1;return}
   if(lv&&celebrate(now)){SID="celeb";cx.globalAlpha=1;return}
@@ -6794,7 +6800,7 @@ function dmdTransition(now){
   if(TR.flash&&p<.18){cx.globalAlpha=(1-p/.18)*.55;cx.fillStyle="#fff4d6";for(let r=0;r<R;r++)for(let c=0;c<C;c++){if((c+r+Math.floor(now/60))%2===0){cx.beginPath();cx.arc((c+.5)*P,(r+.5)*P,P*.34,0,6.2832);cx.fill()}}cx.globalAlpha=1}
 }
 function frame(now){frameBody(now);try{dmdTransition(now)}catch(e){TR=null;if(!window.__trErr){window.__trErr=e;console.error("DMD transition:",e)}}}
-let last=0;(function loop(t){if(t-last>=33){last=t;frame(t)}requestAnimationFrame(loop)})(0);
+let last=0;(function loop(t){if(t-last>=((SID==="menu"||SID.startsWith("idle:"))&&!TR?50:33)){last=t;if(cv.offsetWidth>0)frame(t)}requestAnimationFrame(loop)})(0);   // the slow ambient scenes (menu / idle attract) run at 20 fps, everything else at 30
 })();
 
 /* attract mode on the machine itself: idle (same clock as the DMD attract scenes) -> glow + demo reel spins every ~9 s. Visual only: no bets, gp or xp. */
@@ -7776,7 +7782,7 @@ $("testsklvl").onclick=()=>{const sk=SKILLS[Math.floor(Math.random()*SKILLS.leng
     T(t,()=>{mode=null;running=false;tmr=[]})};
   window.lbCelebrateStop=()=>{tmr.forEach(clearTimeout);tmr=[];mode=null;running=false};
   if(reduce){draw(-9999);return}
-  let last=0;const loop=t=>{if(t-last>45){last=t;draw(t)}requestAnimationFrame(loop)};requestAnimationFrame(loop);
+  let last=0;const loop=t=>{if(t-last>45){last=t;if(cx.canvas.offsetWidth>0)draw(t)}requestAnimationFrame(loop)};requestAnimationFrame(loop);
   setInterval(()=>{if(!document.hidden&&!running)window.lbCelebrate(false)},45000);setTimeout(()=>{if(!running)window.lbCelebrate(false)},20000)})();
 /* ---- Tournament leaderboard overlay: same layout as the GP leaderboard; ranks 1-3 stay put, the rest scroll underneath ---- */
 (()=>{let key="",anim=null;const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -7806,7 +7812,7 @@ $("testsklvl").onclick=()=>{const sk=SKILLS[Math.floor(Math.random()*SKILLS.leng
       const ca=L1[x-offA],cb=L2[x-offB],on=(ca&&y>=1&&y<=7&&ca[y-1])||(cb&&y>=9&&y<=15&&cb[y-9]);
       if(sc!=="."){const dd=Math.abs(x-sw);col=dd<3?"#fff6c8":PAL[sc];a=1}else if(on){const dd=Math.abs(x-sw);col=dd<3?"#fff6c8":dd<7?"#ffd24a":"#ffa818";a=1}else if(Math.abs(x-sw)<2){col="#3a1a06";a=.9}
       cx.fillStyle=col;cx.globalAlpha=a;cx.beginPath();cx.arc((x+.5)*P,(y+.5)*P,P*.42,0,6.2832);cx.fill()}cx.globalAlpha=1};
-  if(reduce){draw(-9999);return}let last=0;const loop=t=>{if(t-last>45){last=t;draw(t)}requestAnimationFrame(loop)};requestAnimationFrame(loop)})();
+  if(reduce){draw(-9999);return}let last=0;const loop=t=>{if(t-last>45){last=t;if(cx.canvas.offsetWidth>0)draw(t)}requestAnimationFrame(loop)};requestAnimationFrame(loop)})();
 {const ts=document.getElementById("themesel");if(ts)ts.onchange=e=>{const v=e.target.value,u="TestViewer";e.target.selectedIndex=0;bank[u]=bank[u]||1000;save();const t=userThemes[u]=userThemes[u]||{own:[],eq:0};THEMES.forEach(x=>{if(!t.own.includes(x.id))t.own.push(x.id)});t.eq=v?(THEMES.find(x=>x.cls===v)||{id:0}).id:0;saveBadges();showCard(u,xp[u]||0,bank[u]);showMach(u,xp[u]||0,bank[u]);try{window.setSkillUser(u);window.setPetUser(u);window.setLogUser(u)}catch(_){}applyThemes();if(window.openShop)window.openShop(u);setStatus&&setStatus(v?"Card theme test applied to TestViewer's player card, machine box, skills, pets, log and shop cards":"Card theme removed")}}
 document.getElementById("testlbc").onclick=()=>{window.lbCelebrateStop&&window.lbCelebrateStop();window.lbCelebrate&&window.lbCelebrate(true)};
 </script>
@@ -8023,7 +8029,7 @@ const b=document.getElementById("testtheme");if(b)b.onclick=()=>{try{window.scro
     for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){let col="#1d0b03",a=.9;const sx=x>=sl&&x<sl+9?x-sl:x>=sr&&x<sr+9?8-(x-sr):-1,sc=sx>=0&&y>=1&&y<=7?SPR[y-1][sx]:".",c=cols[x-off],on=c&&y>=1&&y<=7&&c[y-1];
       if(sc!=="."){const dd=Math.abs(x-sw);col=dd<3?"#fff6c8":PAL[sc];a=1}else if(on){const dd=Math.abs(x-sw);col=dd<3?"#fff6c8":dd<7?"#ffd24a":"#ffa818";a=1}else if(Math.abs(x-sw)<2){col="#3a1a06";a=.9}
       cx.fillStyle=col;cx.globalAlpha=a;cx.beginPath();cx.arc((x+.5)*P,(y+.5)*P,P*.42,0,6.2832);cx.fill()}cx.globalAlpha=1};
-  if(reduce){draw(-9999);return}let last=0;const loop=t=>{if(t-last>45){last=t;draw(t)}requestAnimationFrame(loop)};requestAnimationFrame(loop)})();
+  if(reduce){draw(-9999);return}let last=0;const loop=t=>{if(t-last>45){last=t;if(cx.canvas.offsetWidth>0)draw(t)}requestAnimationFrame(loop)};requestAnimationFrame(loop)})();
 </script>
 <script>
 /* ===== Player queue card: who is spinning now and who is waiting (shared with the OBS overlay through storage) ===== */
