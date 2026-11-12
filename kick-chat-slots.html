@@ -3417,7 +3417,7 @@ window.gcFresh=keys=>{if(!window.__viewOnly)return Promise.resolve();window.__sn
   window.requestAnimationFrame=cb=>{if(!iv)return raf(cb);const id=++vid,w=t=>{if(!map.has(id))return;if(t===gate||t-gate>=iv){gate=t;map.delete(id);cb(t)}else map.set(id,raf(w))};map.set(id,raf(w));return id};
   window.cancelAnimationFrame=id=>{if(map.has(id)){caf(map.get(id));map.delete(id)}else caf(id)};
   const MODES={smooth:[0,0],balanced:[30,0],lite:[20,1]};
-  window.gcApplyPerf=m=>{const c=MODES[m]||MODES.balanced;iv=c[0]?1000/c[0]-3:0;if(/(^|\s)ov-/.test(document.body.className)&&!/(^|\s)ov-(machine|all)(\s|$)/.test(document.body.className))iv=Math.max(iv,47);   /* OBS overlays that do not show the machine: 20 fps is plenty */
+  window.gcApplyPerf=m=>{const c=MODES[m]||MODES.balanced;iv=c[0]?1000/c[0]-3:0;window.__gcMode=m;if(/(^|\s)ov-/.test(document.body.className)&&!/(^|\s)ov-(machine|all)(\s|$)/.test(document.body.className))iv=Math.max(iv,47);   /* OBS overlays that do not show the machine: 20 fps is plenty */
   document.body.classList.toggle("lite",!!c[1])};
   let m="";try{m=JSON.parse(Store.get("kickSlotsSettings")||"{}").perf||""}catch{}
   if(!m){   /* nothing chosen yet: pick a sensible default for this computer. No/weak graphics card (software drawing) -> Lite; few CPU cores -> Balanced; otherwise Smooth. Choosing one in Settings always wins. */
@@ -3656,7 +3656,7 @@ function banner(t,c){/* win banners no longer cover the machine: the jackpot DMD
 const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[0]:(THUMB[IMGS.indexOf(s[0])]||s[0]))+'" alt="">';   // animated symbols (gif / webp) keep their animation: the static thumbnail is only for still images   // the Christmas cracker has no pre-made thumbnail: fall back to its full image
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="1.95";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="1.98";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
@@ -6861,7 +6861,7 @@ const RLP=[
 ];
 let rlLit=false;
 setInterval(()=>{
-  if(!attractOn||$("reels").className==="win"||document.body.classList.contains("menu")&&false){if(rlLit){reelEls.forEach(e=>e.style.boxShadow="");rlLit=false}return}
+  if(!attractOn||!$("machine").offsetWidth||$("reels").className==="win"||document.body.classList.contains("menu")&&false){if(rlLit){reelEls.forEach(e=>e.style.boxShadow="");rlLit=false}return}
   const t=performance.now(),pat=Math.floor(t/4500)%RLP.length,f=RLP[pat];rlLit=true;
   reelEls.forEach((e,i)=>{let b=f(i,t),col="#ffd24a";if(b<0){col="hsl("+((t/6+i*70)%360)+",100%,60%)";b=1}else col=["#ffd24a","#4ad8ff","#ff5d73","#ffd24a","#5dff4a","#ff9a2a","#ff4ad8"][pat];
     e.style.boxShadow=b>.3?"inset 0 0 "+(6+12*b)+"px "+(1+3*b)+"px "+col+",0 0 "+(4+14*b)+"px "+(1+3*b)+"px "+col:""})},80);
@@ -6884,12 +6884,15 @@ const SPAT=[
  (p,n,t)=>{const a=Math.sin(p/n*6.2832*4+t/220);return a>0?.2+.8*a:.06}                    // pulsing waves
 ];
 setInterval(()=>{
-  if(!attractOn){if(studLit){(studs||[]).forEach(e=>{e.style.opacity=e.style.background=e.style.boxShadow=""});studLit=false}return}
+  if(!attractOn){if(studLit){(studs||[]).forEach(e=>{e.style.opacity=e.style.background=e.style.boxShadow="";e.__s=""});studLit=false}return}
+  if(!$("machine").offsetWidth)return;   /* machine not on screen (card / board overlays): skip the light show */
+  if(document.body.classList.contains("lite")){if(studLit){(studs||[]).forEach(e=>{e.style.opacity=e.style.background=e.style.boxShadow="";e.__s=""});studLit=false}return}   /* Lite mode: no border light show */
+  if(window.__gcMode==="balanced"&&(window.__stk=(window.__stk||0)+1)%3)return;   /* Balanced: every third step */
   if(!studs||studs.length<4)studs=getStuds();const t=performance.now(),n=studs.length,pat=Math.floor(t/5500)%SPAT.length,f=SPAT[pat];studLit=true;
   studs.forEach((e,p)=>{let b=f(p,n,t),col;
-    if(b<0){col="hsl("+((p/n*360+t/5)%360)+",100%,60%)";b=1}else col=pat===1?"#ffd86b":["#ffd86b","#ffd86b","#ff5d73","#4ad8ff","#ffd86b","#5dff4a","#ff9a2a","#ff4ad8"][pat];
+    if(b<0){col="hsl("+(Math.round(((p/n*360+t/5)%360)/20)*20)+",100%,60%)";b=1}else col=pat===1?"#ffd86b":["#ffd86b","#ffd86b","#ff5d73","#4ad8ff","#ffd86b","#5dff4a","#ff9a2a","#ff4ad8"][pat];
     if(pat===0)col=((p>>1)+Math.floor(t/400))%3===0?"#ff5d73":((p>>1)+Math.floor(t/400))%3===1?"#ffd86b":"#4ad8ff";
-    e.style.opacity=.2+.8*b;e.style.background=b>.5?col:"#7a5f22";e.style.boxShadow=b>.5?"0 0 0 1px #000,0 0 "+(5+6*b)+"px "+(1+2*b)+"px "+col:"0 0 0 1px #000"})},70);
+    b=Math.round(b*6)/6;const o=(.2+.8*b).toFixed(2),bg=b>.5?col:"#7a5f22",sh=b>.5?"0 0 0 1px #000,0 0 "+(5+6*b).toFixed(1)+"px "+(1+2*b).toFixed(1)+"px "+col:"0 0 0 1px #000",sg=o+bg+sh;if(e.__s!==sg){e.__s=sg;e.style.opacity=o;e.style.background=bg;e.style.boxShadow=sh}})},70);   // only lights whose look actually changed are touched (it used to rewrite every light, ~1,100 style changes a second)
 document.getElementById("dmdsel").onchange=e=>{const v=e.target.value;e.target.value="";const f=window["dmd"+v+"Now"];if(v&&f)f()};
 /* ---- main menu (title screen): Play / Connect / Overlays / Settings / Exit. Shares the machine frame, its border lights and background. ---- */
 (function mainMenu(){
