@@ -3084,6 +3084,13 @@ body.ov-tourneypanel #wrap{grid-template-columns:1fr!important;max-width:390px!i
 #machine.rays #rays::before,#machine.qz.dya #rays::before{animation-play-state:running}
 /* animated pieces get their own graphics layer so they glide on the graphics card instead of being re-painted every frame */
 #pay .track,.it.t4,.it.t5,#rays::before{will-change:transform}
+
+/* PERFORMANCE: the pulsing multiplier numbers used to scale/rotate an SVG group that has two blur glows on it, re-drawing the blur 60 times a second. Now the whole little picture is pulsed as one graphics layer (same look, drawn once) */
+.it.art svg:has(.bigx){animation:bigxp 1.1s ease-in-out infinite;will-change:transform}
+.it.art.t1 svg:has(.bigx){animation:none;will-change:auto}
+.it.art.t10 svg:has(.bigx){animation-duration:.4s}.it.art.t4 svg:has(.bigx){animation-duration:.8s}.it.art.t5 svg:has(.bigx){animation-duration:.55s}
+.it.art .bigx{animation:none!important}
+@media(prefers-reduced-motion:reduce){.it.art svg:has(.bigx){animation:none}}
 </style>
 </head>
 <body>
@@ -3676,7 +3683,7 @@ const mini=s=>'<img class="mini" src="'+(/^data:image\/(gif|webp)/.test(s[0])?s[
 const PAIR=2.5,payout=(bet,mult)=>mult===1?Math.round(bet*PAIR):bet*mult;
 window.isTestUser=u=>u==="you"||u==="TestViewer";   /* the fake chat box ("you") and the test buttons ("TestViewer") never show on the leaderboard */
 const ADMINS=["yhandor","you"];   // Kick usernames (lower-case) with dev/admin rights
-const GAME_VERSION="2.6";   // bump this on every build you publish (the desktop app compares it with the update address)
+const GAME_VERSION="2.7";   // bump this on every build you publish (the desktop app compares it with the update address)
 const START=1000,MIN_BET=10,MAX_BET=500,FREE_AMT=250;
 let SPIN_CD=6000,FREE_CD=5*60*1000;   // both are adjustable in Settings (command cooldowns)
 const $=id=>document.getElementById(id);
